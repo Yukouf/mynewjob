@@ -8,7 +8,7 @@ PORT="${1:-8123}"
 SERVICE="mynewjob"
 
 echo "==> Installation des dépendances"
-apt-get update -q && apt-get install -yq python3 nginx
+apt-get update -q && apt-get install -yq python3 python3-pypdf nginx
 
 echo "==> Copie du site + backend dans $APP_DIR"
 mkdir -p "$APP_DIR"

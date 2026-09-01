@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swipe · MYNEWJOB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="index.html">MYNEW<span>JOB</span></a>
+    <div class="links">
+      <a href="swipe.html">Swipe</a>
+      <a href="feed.html">Offres</a>
+      <a href="marche-cache.html">Marché caché</a>
+      <a href="ia.html">Assistance IA</a>
+      <a href="suivi.html">Suivi</a>
+      <a href="index.html#tarifs">Tarifs</a>
+      <a class="btn" href="#">Créer un compte</a>
+    </div>
+  </div>
+</nav>
+
+<header class="pagehead wrap">
+  <span class="kicker">Swipe</span>
+  <h1>Trouvez vos offres, d'un geste.</h1>
+  <p>Importez votre CV. MYNEWJOB détecte votre domaine et vous montre les offres correspondantes, à faire défiler comme sur Tinder.</p>
+</header>
+
+<section>
+  <div class="wrap feature">
+
+    <!-- ÉTAPE 1 : import du CV -->
+    <div id="step-cv">
+      <div class="swipe-intro">
+        <div class="dropzone" id="dropzone">
+          <div class="icon">📄</div>
+          <p><strong>Déposez votre CV</strong> ou cliquez pour le sélectionner (PDF)</p>
+          <input type="file" id="cvfile" accept=".pdf,application/pdf">
+        </div>
+      </div>
+      <div class="cv-result" id="cv-result">
+        <div class="domaine">Domaine détecté : <span id="cv-domaine" style="color:var(--acc)"></span></div>
+        <div class="chips" id="cv-skills"></div>
+        <div style="display:flex;gap:12px;max-width:480px;margin:0 auto">
+          <input id="q" type="text" placeholder="Domaine ou mot-clé" style="flex:1;border:1px solid var(--line);border-radius:10px;padding:13px 16px;font-size:.95rem;outline:none">
+          <button class="btn" onclick="loadFeed()">Voir mes offres</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 2 : deck de swipe -->
+    <div id="step-feed" style="display:none">
+      <div class="swipe-intro" style="margin-bottom:32px">
+        <p id="feed-title">Offres du domaine</p>
+      </div>
+      <div class="deck" id="deck"></div>
+      <div class="swipe-actions">
+        <button class="act no" onclick="swipe('no')" aria-label="Écarter">✕</button>
+        <button class="act yes" onclick="swipe('yes')" aria-label="Suivre">✓</button>
+      </div>
+      <div class="swipe-count" id="count">0 / 0</div>
+      <div class="deck-end" id="deck-end">
+        <h3 style="margin-bottom:12px">Vous avez parcouru toutes les offres.</h3>
+        <p id="deck-summary" style="margin-bottom:24px"></p>
+        <a class="btn" href="suivi.html">Voir mes candidatures suivies</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="logo" style="margin-bottom:8px">MYNEW<span>JOB</span></div>
+      <small>Alternance, stage et CDI.</small>
+    </div>
+    <div class="cols">
+      <div>
+        <b>Produit</b>
+        <a href="swipe.html">Swipe</a><br>
+        <a href="feed.html">Offres</a><br>
+        <a href="marche-cache.html">Marché caché</a><br>
+        <a href="ia.html">Assistance IA</a><br>
+        <a href="suivi.html">Suivi</a>
+      </div>
+      <div>
+        <b>Entreprise</b>
+        <small>Espace recruteur</small><br>
+        <small>Publier une offre</small><br>
+        <small>CVthèque</small>
+      </div>
+      <div>
+        <b>Légal</b>
+        <a href="mentions-legales.html">Mentions légales</a><br>
+        <a href="cgu.html">CGU</a><br>
+        <a href="confidentialite.html">Confidentialité</a>
+      </div>
+    </div>
+    <div class="legal">
+      <span>© 2026 MYNEWJOB · contact@mynewjob.fr</span>
+      <span>Paiement sécurisé par Stripe · Données hébergées en UE</span>
+    </div>
+  </div>
+</footer>
+
+<div id="cookies">Ce site utilise uniquement les cookies nécessaires à son fonctionnement. <button class="btn" onclick="document.getElementById('cookies').style.display='none';localStorage.setItem('mnj_cookies','1')">Accepter</button></div>
+<script>if(!localStorage.getItem('mnj_cookies')){document.getElementById('cookies').style.display='flex'}</script>
+
+<script>
+  var API = 'http://localhost:8123';
+  var offers = [], index = 0, followed = 0, cardEl = null, drag = null;
+
+  // ── Import du CV ──────────────────────────────────────────────
+  var dz = document.getElementById('dropzone');
+  var fileInput = document.getElementById('cvfile');
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', function () { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+  function handleFile(file) {
+    if (!file.name.toLowerCase().endsWith('.pdf')) { alert('Format accepté : PDF'); return; }
+    var r = new FileReader();
+    r.onload = function () {
+      var b64 = r.result.split(',')[1];
+      fetch(API + '/api/parse-cv', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pdf: b64 })
+      }).then(function (res) { return res.json(); }).then(function (d) {
+        if (d.error) { alert(d.error); return; }
+        dz.style.display = 'none';
+        var box = document.getElementById('cv-result');
+        box.style.display = 'block';
+        document.getElementById('cv-domaine').textContent = d.domaine;
+        var chips = document.getElementById('cv-skills');
+        chips.innerHTML = '';
+        (d.competences || []).slice(0, 10).forEach(function (s) {
+          var sp = document.createElement('span'); sp.textContent = s; chips.appendChild(sp);
+        });
+        document.getElementById('q').value = d.domaine;
+        loadFeed();
+      });
+    };
+    r.readAsDataURL(file);
+  }
+
+  // ── Feed par domaine ──────────────────────────────────────────
+  function loadFeed() {
+    var q = document.getElementById('q').value.trim();
+    if (!q) { alert('Entrez un domaine ou mot-clé'); return; }
+    document.getElementById('step-cv').style.display = 'none';
+    document.getElementById('step-feed').style.display = 'block';
+    document.getElementById('deck-end').style.display = 'none';
+    fetch(API + '/api/feed?q=' + encodeURIComponent(q))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        offers = d.offres || []; index = 0; followed = 0;
+        document.getElementById('feed-title').textContent = 'Offres · ' + d.domaine + ' · ' + offers.length;
+        buildDeck();
+      })
+      .catch(function () { alert('Service de recherche indisponible.'); });
+  }
+
+  // ── Deck Tinder ───────────────────────────────────────────────
+  function buildDeck() {
+    var deck = document.getElementById('deck');
+    deck.innerHTML = '';
+    document.getElementById('count').textContent = '0 / ' + offers.length;
+    if (!offers.length) {
+      deck.innerHTML = '<p style="text-align:center;color:var(--muted);padding-top:140px">Aucune offre pour ce domaine.</p>';
+      return;
+    }
+    offers.forEach(function (o, i) { deck.appendChild(makeCard(o, i)); });
+    attachDrag();
+    renderTop();
+  }
+  function makeCard(o, i) {
+    var c = document.createElement('div');
+    c.className = 'card';
+    c.dataset.i = i;
+    c.style.zIndex = offers.length - i;
+    if (i < offers.length - 1) c.style.transform = 'scale(' + (1 - (offers.length - 1 - i) * 0.02) + ') translateY(' + (offers.length - 1 - i) * 8 + 'px)';
+    c.innerHTML =
+      '<span class="badge no">NON</span><span class="badge yes">SUIVRE</span>' +
+      '<div class="head"><span class="tag">' + esc(o.company || '') + '</span>' +
+      '<span class="pct-big">' + o.score + '%</span></div>' +
+      '<h3>' + esc(o.title) + '</h3>' +
+      '<div class="meta">' + esc(o.city || '') + '</div>' +
+      '<div class="skills">' + esc((o.text || '').slice(0, 160)) + '…</div>';
+    return c;
+  }
+  function renderTop() {
+    var cards = document.querySelectorAll('.card');
+    if (index >= offers.length) { endDeck(); return; }
+    document.getElementById('count').textContent = (index + 1) + ' / ' + offers.length;
+    attachDrag();
+  }
+  function attachDrag() {
+    var top = document.querySelector('.card[data-i="' + index + '"]');
+    if (!top) return;
+    cardEl = top;
+    top.addEventListener('pointerdown', onDown);
+  }
+  function onDown(e) {
+    drag = { x: e.clientX, y: e.clientY, dx: 0, dy: 0 };
+    cardEl.classList.add('dragging');
+    cardEl.setPointerCapture(e.pointerId);
+  }
+  document.addEventListener('pointermove', function (e) {
+    if (!drag || !cardEl) return;
+    drag.dx = e.clientX - drag.x; drag.dy = e.clientY - drag.y;
+    cardEl.style.transform = 'translate(' + drag.dx + 'px,' + drag.dy + 'px) rotate(' + (drag.dx / 18) + 'deg)';
+    cardEl.querySelector('.badge.no').style.display = drag.dx < -30 ? 'block' : 'none';
+    cardEl.querySelector('.badge.yes').style.display = drag.dx > 30 ? 'block' : 'none';
+  });
+  document.addEventListener('pointerup', function () {
+    if (!drag || !cardEl) return;
+    var dx = drag.dx;
+    drag = null;
+    cardEl.classList.remove('dragging');
+    if (Math.abs(dx) > 90) { swipeOut(dx < 0 ? 'no' : 'yes'); }
+    else { cardEl.style.transform = ''; cardEl.querySelector('.badge.no').style.display = 'none'; cardEl.querySelector('.badge.yes').style.display = 'none'; }
+  });
+
+  function swipe(dir) {
+    if (!cardEl || index >= offers.length) return;
+    swipeOut(dir);
+  }
+  function swipeOut(dir) {
+    var el = cardEl;
+    if (dir === 'yes') followed++;
+    el.classList.add(dir === 'yes' ? 'fly-right' : 'fly-left');
+    el.style.pointerEvents = 'none';
+    setTimeout(function () { el.style.display = 'none'; }, 400);
+    index++;
+    setTimeout(renderTop, 380);
+  }
+  function endDeck() {
+    document.getElementById('count').textContent = '';
+    document.getElementById('deck').innerHTML = '';
+    document.getElementById('deck-end').style.display = 'block';
+    document.getElementById('deck-summary').textContent = followed + ' offre(s) suivie(s) sur ' + offers.length + '. ' +
+      (followed ? 'Elles apparaissent dans votre suivi.' : 'Aucune n\'a retenu votre attention.');
+  }
+  function esc(t) { var d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+</script>
+
+</body>
+</html>

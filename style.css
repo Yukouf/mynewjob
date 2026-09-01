@@ -159,6 +159,39 @@ footer .cols a:hover { color:#fff; }
 footer .legal { width:100%; border-top:1px solid rgba(255,255,255,.08); padding-top:24px; margin-top:8px;
                 display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:.8rem; color:#4b5563; }
 
+/* SWIPE TINDER */
+.swipe-intro { text-align:center; max-width:560px; margin:0 auto 48px; }
+.dropzone { border:2px dashed var(--line); border-radius:var(--radius); padding:48px 24px; text-align:center; cursor:pointer;
+            background:#fafafa; transition:border-color .15s, background .15s; max-width:480px; margin:0 auto; }
+.dropzone:hover, .dropzone.over { border-color:var(--acc); background:var(--acc-soft); }
+.dropzone .icon { font-size:2.2rem; margin-bottom:10px; }
+.dropzone p { font-size:.9rem; }
+.dropzone input { display:none; }
+.cv-result { max-width:560px; margin:28px auto 0; display:none; }
+.cv-result .domaine { font-size:1.1rem; font-weight:600; margin-bottom:12px; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+.chips span { background:var(--acc-soft); color:var(--acc); font-size:.8rem; padding:5px 12px; border-radius:99px; font-weight:600; }
+.deck { position:relative; height:400px; max-width:420px; margin:0 auto; }
+.card { position:absolute; inset:0; background:#fff; border:1px solid var(--line); border-radius:18px; padding:26px;
+        box-shadow:0 24px 60px -24px rgba(0,0,0,.3); touch-action:none; user-select:none; cursor:grab; }
+.card.dragging { cursor:grabbing; transition:none; }
+.card .head { display:flex; justify-content:space-between; align-items:flex-start; }
+.card .tag { font-size:.72rem; background:var(--acc-soft); color:var(--acc); padding:4px 12px; border-radius:99px; font-weight:600; }
+.card .pct-big { font-size:1.8rem; font-weight:700; font-family:var(--font-display); color:var(--acc); letter-spacing:-.02em; }
+.card h3 { font-size:1.25rem; margin:16px 0 6px; }
+.card .meta { color:var(--muted); font-size:.88rem; margin-bottom:14px; }
+.card .skills { color:var(--muted); font-size:.9rem; }
+.badge { position:absolute; top:24px; left:24px; font-size:1.6rem; font-weight:800; padding:6px 16px; border-radius:10px; display:none; }
+.badge.no { color:var(--red); border:4px solid var(--red); transform:rotate(-12deg); }
+.badge.yes { color:var(--green); border:4px solid var(--green); transform:rotate(12deg); }
+.swipe-actions { display:flex; justify-content:center; gap:20px; margin-top:28px; }
+.swipe-actions .act { width:64px; height:64px; border-radius:50%; border:2px solid var(--line); background:#fff; font-size:1.5rem;
+                      cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .15s, border-color .15s; }
+.swipe-actions .act.no:hover { border-color:var(--red); transform:scale(1.08); }
+.swipe-actions .act.yes:hover { border-color:var(--green); transform:scale(1.08); }
+.swipe-count { text-align:center; color:var(--muted); font-size:.85rem; margin-top:16px; }
+.deck-end { display:none; text-align:center; padding:48px 0; }
+
 /* BANDEAU COOKIES */
 #cookies { position:fixed; bottom:0; left:0; right:0; background:var(--dark); color:#cbd5e1; padding:14px 24px; display:none;
            align-items:center; justify-content:center; gap:16px; flex-wrap:wrap; z-index:100; font-size:.85rem;

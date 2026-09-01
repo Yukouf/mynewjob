@@ -22,21 +22,31 @@ Clés (variables d'environnement) :
 Lancement : python3 app.py [port]  (défaut 8000). DB créée à côté : mynewjob.db
 """
 import json, os, re, secrets, sqlite3, sys, unicodedata, urllib.parse, urllib.request
+from base64 import b64decode
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from hashlib import pbkdf2_hmac
 from pathlib import Path
+import tempfile
+
+try:
+    from pypdf import PdfReader
+    HAS_PYPDF = True
+except ImportError:
+    HAS_PYPDF = False
 
 STATIC_DIR = Path(__file__).resolve().parent.parent   # sert le site (jobpilot/)
 DB_PATH = Path(__file__).resolve().parent / "mynewjob.db"
 
 # ── Base de données ───────────────────────────────────────────────────────────
 def db():
-    c = sqlite3.connect(DB_PATH)
+    c = sqlite3.connect(DB_PATH, timeout=15)
     c.row_factory = sqlite3.Row
+    c.execute("PRAGMA busy_timeout=15000")
     return c
 
 def init_db():
     c = db()
+    c.execute("PRAGMA journal_mode=WAL")
     c.executescript("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -111,7 +121,80 @@ SAMPLE_OFFERS = [
      "text": "NIS2, EBIOS RM, ISO 27001, gestion des risques, audits de conformité. 32-48k€."},
     {"title": "Ingénieur DevSecOps", "company": "TechCorp", "city": "Paris",
      "text": "CI/CD, Kubernetes, Terraform, SAST/DAST, pipelines sécurisés. 50-70k€."},
+    {"title": "Développeur Full-Stack JavaScript (H/F)", "company": "NovaSoft", "city": "Paris",
+     "text": "React, Node.js, TypeScript, API REST, Git. CDI ou alternance, 38-52k€."},
+    {"title": "Data Analyst Junior", "company": "Datacraft", "city": "Lyon",
+     "text": "SQL, Python, Power BI, analyse de données, dashboards. Alternance acceptée, 35-45k€."},
+    {"title": "Chargé de Marketing Digital", "company": "GlowMedia", "city": "Paris",
+     "text": "SEO, SEA, réseaux sociaux, création de contenu, CRM. Stage ou alternance."},
+    {"title": "Assistant Comptable (H/F)", "company": "FinadVis", "city": "Bordeaux",
+     "text": "Comptabilité générale, gestion, facturation, trésorerie. Alternance acceptée."},
+    {"title": "Chargé de Recrutement RH", "company": "PeopleFirst", "city": "Lille",
+     "text": "Recrutement, paie, droit du travail, relations sociales. 32-40k€."},
+    {"title": "Juriste Droit des Contrats", "company": "LexPartners", "city": "Paris",
+     "text": "Rédaction de contrats, conformité, réglementation, compliance. CDI 40-55k€."},
+    {"title": "UX/UI Designer", "company": "PixelLab", "city": "Remote",
+     "text": "Figma, UX, UI, maquettes, design system, recherche utilisateur. Alternance."},
+    {"title": "Technicien Systèmes & Réseaux", "company": "NetWork", "city": "Nantes",
+     "text": "Linux, Windows Server, réseaux, virtualisation, support N2. 30-38k€."},
 ]
+
+# Mots-clés par domaine (pour le feed « selon ton CV »)
+DOMAIN_KEYWORDS = {
+    "cybersecurite": ["cyber", "sécurité", "securite", "siem", "soc", "xdr", "edr", "incident", "nis2",
+                      "pentest", "wazuh", "suricata", "forensique", "threat", "cve", "firewall", "ids", "ips",
+                      "conformité", "audit", "hacking", "ransomware", "vulnérabilité"],
+    "informatique": ["développeur", "developpeur", "développement", "python", "java", "javascript", "react",
+                     "node", "typescript", "docker", "kubernetes", "terraform", "git", "devops", "api",
+                     "cloud", "aws", "azure", "linux", "réseaux", "reseaux", "full-stack", "fullstack"],
+    "data": ["data", "sql", "pandas", "power bi", "machine learning", "analyse de données", "analyse de donnees",
+             "dashboards", "statistique", "big data"],
+    "marketing": ["marketing", "seo", "sea", "réseaux sociaux", "reseaux sociaux", "contenu", "crm", "publicité", "marque"],
+    "finance": ["comptable", "comptabilité", "comptabilite", "gestion", "trésorerie", "tresorerie", "facturation", "finance", "banque"],
+    "rh": ["recrutement", "paie", "droit du travail", "ressources humaines", "relations sociales"],
+    "droit": ["droit", "juriste", "contrat", "réglementation", "reglementation", "compliance"],
+    "design": ["design", "figma", "ux", "ui", "maquette", "graphisme", "design system"],
+}
+
+def kw_match(text, kw):
+    """Mot-clé avec frontières de mot pour les termes courts (évite « soc » dans « sociales »)."""
+    if len(kw) <= 4:
+        return re.search(r"(?<![a-z0-9])" + re.escape(kw) + r"(?![a-z0-9])", text) is not None
+    return kw in text
+
+def detect_domain(text):
+    t = normalize(text)
+    best, best_n = None, 0
+    for dom, kws in DOMAIN_KEYWORDS.items():
+        n = sum(1 for kw in kws if kw_match(t, kw))
+        if n > best_n:
+            best, best_n = dom, n
+    return best or "informatique", best_n
+
+def extract_skills(text):
+    t = normalize(text)
+    found = []
+    for dom, kws in DOMAIN_KEYWORDS.items():
+        for kw in kws:
+            if kw_match(t, kw) and kw not in found:
+                found.append(kw)
+    # limite l'affichage, dédoublonne les quasi-synonymes
+    return found[:12]
+
+def feed_offers(q, domain=None):
+    """Offres du domaine, notées et triées (moteur du swipe)."""
+    tq = normalize(q)
+    dom = domain or detect_domain(tq)[0]
+    kws = DOMAIN_KEYWORDS.get(dom, [])
+    out = []
+    for o in SAMPLE_OFFERS:
+        blob = normalize(o["title"] + " " + o["text"])
+        if kws and not any(kw_match(blob, k) for k in kws):
+            continue
+        s = score_offer(o["text"] + " " + o["title"])
+        out.append({**o, "score": s["score"], "points_forts": s["points_forts"]})
+    out.sort(key=lambda x: -x["score"])
+    return {"domaine": dom, "offres": out[:10]}
 
 def search_offers(q, city=""):
     q = normalize(q)
@@ -194,6 +277,25 @@ def template_letter(title, company, details=""):
           f"Disponible rapidement, je me tiens à votre disposition pour un entretien.\n\n"
           f"Cordialement,\nYoussef Guerniou")
 
+def parse_cv(pdf_b64):
+    """Extrait le texte d'un CV PDF, détecte le domaine et les compétences."""
+    if not HAS_PYPDF:
+        return {"error": "pypdf absent : installez-le (pip install pypdf ou apt install python3-pypdf)"}
+    try:
+        raw = b64decode(pdf_b64)
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=True) as f:
+            f.write(raw)
+            f.flush()
+            reader = PdfReader(f.name)
+            text = "\n".join((pg.extract_text() or "") for pg in reader.pages)
+    except Exception as e:
+        return {"error": f"PDF illisible : {e}"}
+    if not text.strip():
+        return {"error": "Aucun texte extrait (CV scanné en image ?)"}
+    dom, dom_n = detect_domain(text)
+    return {"domaine": dom, "confiance": dom_n, "competences": extract_skills(text),
+            "mots": len(text.split()), "apercu": text[:400]}
+
 # ── Serveur HTTP ─────────────────────────────────────────────────────────────
 MIME = {".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
         ".js": "application/javascript", ".png": "image/png", ".jpg": "image/jpeg",
@@ -241,6 +343,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(search((p.get("q") or [""])[0], (p.get("city") or [""])[0]))
             elif u.path == "/api/score":
                 self._json(score_offer((p.get("text") or [""])[0]))
+            elif u.path == "/api/feed":
+                self._json(feed_offers((p.get("q") or [""])[0], (p.get("domaine") or [None])[0]))
             elif u.path == "/api/me":
                 uid = self._user()
                 self._json({"authentifie": uid is not None, "user_id": uid})
@@ -306,6 +410,8 @@ class Handler(BaseHTTPRequestHandler):
             c.execute("DELETE FROM follows WHERE user_id=? AND offer_key=?", (uid, data.get("offer_key", "")))
             c.commit()
             self._json({"ok": True})
+        elif u.path == "/api/parse-cv":
+            self._json(parse_cv(data.get("pdf", "")))
         elif u.path == "/api/letter":
             self._json(generate_letter(data.get("title", ""), data.get("company", ""), data.get("details", "")))
         else:
