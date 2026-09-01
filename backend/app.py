@@ -161,25 +161,38 @@ def search(q, city=""):
 
 # ── Lettre via DeepSeek ──────────────────────────────────────────────────────
 def generate_letter(title, company, details=""):
-    key = os.environ.get("DEEPSEEK_API_KEY", "")
-    if not key:
-        return {"error": "DEEPSEEK_API_KEY manquante"}
-    profile = ("Analyste cybersécurité, 3 ans d'expérience SOC (Wazuh, Suricata, SOAR/Shuffle, "
-               "LLM local Ollama, hardening Active Directory, conformité NIS2/ANSSI). "
-               "Master Cybersécurité fin octobre 2026, CCNA, anglais C1.")
-    sys_msg = ("Vous rédigez des lettres de motivation en français, concises et professionnelles. "
-               "Maximum 180 mots, ton sobre. Terminez par la signature : Youssef Guerniou.")
-    user_msg = (f"Poste : {title}\nEntreprise : {company}\n"
-                + (f"Détails de l'offre : {details}\n" if details else "")
-                + f"Profil du candidat : {profile}")
-    body = json.dumps({"model": "deepseek-chat",
-                       "messages": [{"role": "system", "content": sys_msg},
-                                    {"role": "user", "content": user_msg}],
-                       "temperature": 0.7, "max_tokens": 500}).encode()
-    req = urllib.request.Request("https://api.deepseek.com/chat/completions", data=body,
-                                 headers={"Content-Type": "application/json", "Authorization": "Bearer " + key})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return {"lettre": json.load(r)["choices"][0]["message"]["content"]}
+  key = os.environ.get("DEEPSEEK_API_KEY", "")
+  if not key:
+      return {"lettre": template_letter(title, company, details), "mode": "gabarit"}
+  profile = ("Analyste cybersécurité, 3 ans d'expérience SOC (Wazuh, Suricata, SOAR/Shuffle, "
+             "LLM local Ollama, hardening Active Directory, conformité NIS2/ANSSI). "
+             "Master Cybersécurité fin octobre 2026, CCNA, anglais C1.")
+  sys_msg = ("Vous rédigez des lettres de motivation en français, concises et professionnelles. "
+             "Maximum 180 mots, ton sobre. Terminez par la signature : Youssef Guerniou.")
+  user_msg = (f"Poste : {title}\nEntreprise : {company}\n"
+              + (f"Détails de l'offre : {details}\n" if details else "")
+              + f"Profil du candidat : {profile}")
+  body = json.dumps({"model": "deepseek-chat",
+                     "messages": [{"role": "system", "content": sys_msg},
+                                  {"role": "user", "content": user_msg}],
+                     "temperature": 0.7, "max_tokens": 500}).encode()
+  req = urllib.request.Request("https://api.deepseek.com/chat/completions", data=body,
+                               headers={"Content-Type": "application/json", "Authorization": "Bearer " + key})
+  with urllib.request.urlopen(req, timeout=60) as r:
+      return {"lettre": json.load(r)["choices"][0]["message"]["content"], "mode": "ia"}
+
+def template_letter(title, company, details=""):
+  """Gabarit hors ligne : fonctionne sans aucune clé API."""
+  desc = details[:300] if details else "le poste proposé"
+  exp = ("Mon expérience de trois ans en supervision SOC (Wazuh, Suricata), en réponse aux "
+         "incidents et en automatisation des analyses d'alertes me semble directement "
+         "transposable à ce poste.")
+  return (f"Madame, Monsieur,\n\n"
+          f"Votre offre « {title} » retient toute mon attention. {exp}\n\n"
+          f"J'ai notamment automatisé l'analyse d'un volume élevé d'alertes grâce à un LLM local, "
+          f"une démarche qui rejoint les besoins décrits pour {desc}.\n\n"
+          f"Disponible rapidement, je me tiens à votre disposition pour un entretien.\n\n"
+          f"Cordialement,\nYoussef Guerniou")
 
 # ── Serveur HTTP ─────────────────────────────────────────────────────────────
 MIME = {".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
