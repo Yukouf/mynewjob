@@ -150,9 +150,9 @@
         </div>
         <div>
           <div style="font-weight:700;margin-bottom:10px;color:#fff">Légal</div>
-          <small>Mentions légales</small><br>
-          <small>CGU</small><br>
-          <small>Confidentialité</small><br>
+          <small><a href="mentions-legales.html">Mentions légales</a></small><br>
+          <small><a href="cgu.html">CGU</a></small><br>
+          <small><a href="confidentialite.html">Confidentialité</a></small><br>
           <small>contact@mynewjob.fr</small>
         </div>
       </div>
@@ -224,5 +224,7 @@
   document.getElementById('city').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
 </script>
 
+<div id="cookies">Ce site utilise uniquement les cookies nécessaires à son fonctionnement. <button class="btn" onclick="document.getElementById('cookies').style.display='none';localStorage.setItem('mnj_cookies','1')">Accepter</button></div>
+<script>if(!localStorage.getItem('mnj_cookies')){document.getElementById('cookies').style.display='flex'}</script>
 </body>
 </html>
