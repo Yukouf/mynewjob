@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MYNEWJOB · Trouve ton alternance, ton stage ou ton CDI</title>
+<title>MYNEWJOB · Alternance, stage et CDI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
@@ -15,127 +15,115 @@
   <div class="wrap">
     <a class="logo" href="index.html">MYNEW<span>JOB</span></a>
     <div class="links">
-      <a href="feed.html">Feed</a>
+      <a href="feed.html">Offres</a>
       <a href="marche-cache.html">Marché caché</a>
-      <a href="ia.html">L'IA</a>
+      <a href="ia.html">Assistance IA</a>
       <a href="suivi.html">Suivi</a>
-      <a href="#pricing">Tarifs</a>
-      <a class="btn ghost" href="#">Commencer gratuitement</a>
+      <a href="#tarifs">Tarifs</a>
+      <a class="btn ghost" href="#">Créer un compte</a>
     </div>
   </div>
 </nav>
 
 <header class="hero wrap">
-  <span class="kicker">Sans spam, sans intérim, sans bullshit</span>
-  <h1>Trouve ton <em>alternance</em>, ton stage ou ton CDI sans passer des heures à postuler.</h1>
-  <p>Le moteur de recherche qui agrège toutes les offres, révèle les entreprises qui recrutent sans annonce, et dont l'IA génère ta lettre et optimise ton CV.</p>
+  <span class="kicker">Recherche d'emploi assistée</span>
+  <h1>Trouvez votre <em>alternance</em>, votre stage ou votre CDI.</h1>
+  <p>Offres agrégées, score de compatibilité sur votre profil, lettres et CV préparés par IA.</p>
   <div class="ctas">
-    <a class="btn" href="#">Commencer gratuitement →</a>
-    <a class="btn ghost" href="#features">Voir comment ça marche</a>
+    <a class="btn" href="#">Créer un compte →</a>
+    <a class="btn ghost" href="#offres">Voir les offres</a>
   </div>
   <div class="searchbar">
-    <input id="q" type="text" placeholder="Métier ou mot-clé…">
-    <input id="city" type="text" placeholder="Ville…">
+    <input id="q" type="text" placeholder="Métier ou mot-clé">
+    <input id="city" type="text" placeholder="Ville">
     <button onclick="doSearch()">Rechercher</button>
   </div>
   <div id="results" style="text-align:left;max-width:680px;margin:30px auto 0;display:none"></div>
 </header>
 
-<section style="padding:60px 0">
+<section class="stats-section">
   <div class="wrap stats">
-    <div class="t"><strong>400 000+</strong><span>entreprises du marché caché</span></div>
+    <div class="t"><strong>400 000+</strong><span>entreprises identifiées</span></div>
     <div class="t"><strong>100+</strong><span>sources agrégées</span></div>
     <div class="t"><strong>2 min</strong><span>par candidature</span></div>
-    <div class="t"><strong>0 €</strong><span>gratuit, sans paywall</span></div>
+    <div class="t"><strong>0 €</strong><span>formule gratuite</span></div>
   </div>
 </section>
 
-<section id="features">
+<section id="offres">
   <div class="wrap">
-    <div class="sec-head"><span class="kicker">Comment ça marche</span><h2>Un parcours, zéro friction</h2>
-    <p>Recherche, swipe, candidature assistée, suivi. Tout au même endroit, en 3 étapes.</p></div>
+    <div class="sec-head"><h2>Comment ça fonctionne</h2></div>
     <div class="steps">
-      <div class="step"><div class="num">1</div><h3>Dépose ton CV</h3><p>Une seule fois. Ton profil est analysé pour calculer un score de match sur chaque offre.</p></div>
-      <div class="step"><div class="num">2</div><h3>Swipe les offres</h3><p>Chaque offre est notée sur ton profil. Un swipe pour suivre, un pour écarter. <a href="feed.html">Découvrir le feed →</a></p></div>
-      <div class="step"><div class="num">3</div><h3>L'IA postule avec toi</h3><p>Lettre et CV adaptés à chaque poste, en PDF propre et compatible ATS. <a href="ia.html">Découvrir l'IA →</a></p></div>
+      <div class="step"><div class="num">1</div><h3>Déposez votre CV</h3><p>Une seule fois. Votre profil est analysé pour évaluer chaque offre.</p></div>
+      <div class="step"><div class="num">2</div><h3>Consultez les offres</h3><p>Chaque offre reçoit un score de compatibilité. <a href="feed.html">Voir le feed →</a></p></div>
+      <div class="step"><div class="num">3</div><h3>Candidatures préparées</h3><p>Lettre et CV adaptés au poste, au format compatible ATS. <a href="ia.html">Assistance IA →</a></p></div>
     </div>
   </div>
 </section>
 
-<section id="pricing" class="alt">
+<section id="tarifs" class="alt">
   <div class="wrap">
-    <div class="sec-head"><span class="kicker">Tarifs</span><h2>Un prix simple. Zéro engagement.</h2>
-    <p>Cherche gratuitement autant que tu veux. Passe Pro le jour où tu postules pour de vrai.</p></div>
+    <div class="sec-head"><h2>Tarifs</h2>
+    <p>Recherche gratuite et illimitée. Options payantes pour la préparation des candidatures.</p></div>
     <div class="plans">
       <div class="plan">
         <h3>Découverte</h3>
         <div class="price">0 €</div>
-        <div class="sub">Pour explorer sans engagement · sans carte</div>
+        <div class="sub">Sans carte bancaire</div>
         <ul>
-          <li>Recherche multi-sources (France Travail + LBA)</li>
-          <li>Le marché caché : entreprises + décideur identifié</li>
-          <li>Score de match % sur chaque offre</li>
-          <li>10 swipes par jour</li>
-          <li>2 lettres et 2 CV optimisés / mois</li>
+          <li>Recherche multi-sources</li>
+          <li>Marché caché : entreprises et contacts</li>
+          <li>Score de compatibilité</li>
+          <li>10 candidatures suivies / mois</li>
         </ul>
-        <a class="btn ghost" href="#">Créer un compte gratuit</a>
+        <a class="btn ghost" href="#">Créer un compte</a>
       </div>
       <div class="plan pop">
         <span class="rec">RECOMMANDÉ</span>
         <h3>Pro</h3>
         <div class="price">39 €<small>/mois</small></div>
-        <div class="sub">Sans engagement, résiliable à tout moment</div>
+        <div class="sub">Résiliable à tout moment</div>
         <ul>
           <li>Tout Découverte, plus :</li>
-          <li>Postuler en 1 clic au marché caché</li>
-          <li>L'email du décideur trouvé pour toi</li>
-          <li>Swipes illimités</li>
+          <li>Candidatures au marché caché</li>
+          <li>Email du décideur</li>
           <li>Lettres et CV IA illimités</li>
-          <li>Analyse de match détaillée</li>
+          <li>Analyse de compatibilité détaillée</li>
           <li>Alertes sur les nouvelles offres</li>
-          <li>Support prioritaire</li>
         </ul>
-        <a class="btn" href="#">Démarrer Pro →</a>
+        <a class="btn" href="#">Commencer Pro →</a>
       </div>
       <div class="plan">
         <h3>Entreprise</h3>
         <div class="price">199 €<small>HT / mois</small></div>
-        <div class="sub">Pour recruter sur MYNEWJOB</div>
+        <div class="sub">Recrutement sur MYNEWJOB</div>
         <ul>
-          <li>Candidatures reçues illimitées</li>
-          <li>CVthèque complète + filtres</li>
+          <li>Candidatures illimitées</li>
+          <li>CVthèque avec filtres</li>
           <li>20 prises de contact / jour</li>
-          <li>10 offres publiées dans le feed candidat</li>
+          <li>10 offres publiées dans le feed</li>
         </ul>
-        <a class="btn ghost" href="#">Ouvrir mon espace entreprise</a>
+        <a class="btn ghost" href="#">Espace entreprise</a>
       </div>
     </div>
     <div class="trust" style="margin-top:48px">
-      <div class="t"><strong>💳 Paiement Stripe</strong><span>Ta carte est saisie chez Stripe, jamais chez nous.</span></div>
-      <div class="t"><strong>↩️ Résiliable en 1 clic</strong><span>Depuis tes réglages, sans email à envoyer.</span></div>
-      <div class="t"><strong>💶 30 jours remboursé</strong><span>Si ça ne t'aide pas à décrocher, on te rembourse.</span></div>
-      <div class="t"><strong>🆓 Sans engagement</strong><span>La recherche d'offres reste gratuite pour toujours.</span></div>
+      <div class="t"><strong>Paiement sécurisé</strong><span>Carte traitée par Stripe.</span></div>
+      <div class="t"><strong>Résiliation en 1 clic</strong><span>Depuis vos réglages.</span></div>
+      <div class="t"><strong>Remboursement 30 jours</strong><span>Si le service ne vous aide pas.</span></div>
+      <div class="t"><strong>Sans engagement</strong><span>La recherche reste gratuite.</span></div>
     </div>
   </div>
 </section>
 
 <section id="faq">
   <div class="wrap">
-    <div class="sec-head"><span class="kicker">FAQ</span><h2>Questions fréquentes</h2></div>
+    <div class="sec-head"><h2>Questions fréquentes</h2></div>
     <div class="faq">
-      <details><summary>Qu'est-ce que MYNEWJOB ?</summary><p>Un moteur de recherche d'alternance, de stage, de CDI et de job étudiant qui agrège les offres (France Travail, La Bonne Alternance) et le marché caché, avec un score de match sur ton profil et des candidatures assistées par IA.</p></details>
-      <details><summary>C'est vraiment gratuit ?</summary><p>Oui. La recherche d'offres, l'accès au marché caché et le suivi sont gratuits et illimités. Le plan Pro débloque les CV et lettres IA en illimité.</p></details>
-      <details><summary>C'est quoi le « marché caché » ?</summary><p>Des entreprises qui recrutent en alternance sans publier d'annonce. On les identifie et on te donne le bon interlocuteur à contacter pour une candidature spontanée ciblée.</p></details>
-      <details><summary>Les documents générés sont-ils compatibles ATS ?</summary><p>Oui : texte sélectionnable, structure propre, lisibles par les logiciels de recrutement.</p></details>
+      <details><summary>Qu'est-ce que MYNEWJOB ?</summary><p>Un moteur de recherche d'alternance, de stage et de CDI qui agrège les offres (France Travail, La Bonne Alternance), identifie les entreprises qui recrutent sans annonce, et prépare les candidatures avec une assistance IA.</p></details>
+      <details><summary>La recherche est-elle gratuite ?</summary><p>Oui, sans limite. Le plan Pro ajoute la préparation illimitée des lettres et CV.</p></details>
+      <details><summary>Qu'est-ce que le marché caché ?</summary><p>Des entreprises qui recrutent sans publier d'offre. MYNEWJOB identifie le bon contact pour une candidature spontanée ciblée.</p></details>
+      <details><summary>Les documents générés sont-ils compatibles ATS ?</summary><p>Oui : texte sélectionnable, structure standard, lisibles par les logiciels de recrutement.</p></details>
     </div>
-  </div>
-</section>
-
-<section class="alt">
-  <div class="wrap" style="text-align:center">
-    <h2 style="font-size:2rem;margin-bottom:14px">Prêt à trouver ton job ?</h2>
-    <p style="color:var(--muted);margin-bottom:24px">Lance ta première recherche en 10 secondes. Gratuit, sans compte obligatoire.</p>
-    <a class="btn" href="#">Commencer gratuitement →</a>
   </div>
 </section>
 
@@ -144,14 +132,14 @@
     <div style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:24px">
       <div>
         <div class="logo" style="margin-bottom:8px">MYNEW<span>JOB</span></div>
-        <small>Trouve ton alternance, ton stage ou ton CDI.</small>
+        <small>Alternance, stage et CDI.</small>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:40px">
         <div>
           <div style="font-weight:700;margin-bottom:10px;color:#fff">Produit</div>
-          <small><a href="feed.html">Feed</a></small><br>
+          <small><a href="feed.html">Offres</a></small><br>
           <small><a href="marche-cache.html">Marché caché</a></small><br>
-          <small><a href="ia.html">L'IA</a></small><br>
+          <small><a href="ia.html">Assistance IA</a></small><br>
           <small><a href="suivi.html">Suivi</a></small>
         </div>
         <div>
@@ -169,7 +157,7 @@
         </div>
       </div>
     </div>
-    <small>© 2026 MYNEWJOB · Paiement sécurisé par Stripe · Fait en France 🇫🇷 · Données hébergées en UE (RGPD) · Bientôt sur iOS & Android</small>
+    <small>© 2026 MYNEWJOB · Paiement sécurisé par Stripe · Données hébergées en UE (RGPD)</small>
   </div>
 </footer>
 
@@ -181,7 +169,7 @@
     var q = document.getElementById('q').value;
     var city = document.getElementById('city').value;
     var box = document.getElementById('results');
-    if (!q) { alert('Entre un mot-clé (ex: soc, cybersecurite, grc)'); return; }
+    if (!q) { alert('Entrez un mot-clé (ex : soc, cybersecurite, grc)'); return; }
     box.style.display = 'block';
     box.innerHTML = '<p>Recherche en cours…</p>';
     try {
@@ -192,7 +180,7 @@
       box.innerHTML = '<p style="margin-bottom:14px">Source : ' + esc(d.source) + ' · ' + lastOffers.length + ' offre(s)</p>';
       for (var i = 0; i < lastOffers.length; i++) box.appendChild(makeCard(lastOffers[i], i));
     } catch (e) {
-      box.innerHTML = '<p>Backend injoignable (' + esc(API) + '). Lance : cd ~/products/jobpilot/backend && python3 app.py 8123</p>';
+      box.innerHTML = '<p>Service de recherche indisponible. Réessayez plus tard.</p>';
     }
   }
   function makeCard(o, i) {
@@ -205,7 +193,7 @@
       '<div class="meta">' + esc(o.city || '') + '</div>' +
       '<div class="actions"><span class="no" onclick="swipeNo(this)">Écarter</span>' +
       '<span class="yes" onclick="swipeYes(this)">Suivre</span></div>' +
-      '<button class="btn ghost" style="width:100%;margin-top:10px" onclick="genLetter(' + i + ')">Générer ma lettre</button>' +
+      '<button class="btn ghost" style="width:100%;margin-top:10px" onclick="genLetter(' + i + ')">Préparer ma lettre</button>' +
       '<div id="letter-' + i + '" style="display:none;margin-top:12px;white-space:pre-wrap;background:#f9fafb;border:1px solid var(--line);border-radius:8px;padding:14px;font-size:.9rem"></div>';
     fetch(API + '/api/score?text=' + encodeURIComponent((o.text || o.title || '') + ' ' + o.title))
       .then(function (r) { return r.json(); })
@@ -216,7 +204,7 @@
     var o = lastOffers[i];
     var box = document.getElementById('letter-' + i);
     box.style.display = 'block';
-    box.textContent = 'Génération en cours…';
+    box.textContent = 'Préparation en cours…';
     try {
       var r = await fetch(API + '/api/letter', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -224,13 +212,13 @@
       });
       var d = await r.json();
       box.textContent = d.lettre || JSON.stringify(d);
-    } catch (e) { box.textContent = 'Erreur : backend injoignable'; }
+    } catch (e) { box.textContent = 'Service indisponible, réessayez plus tard.'; }
   }
   function swipeNo(el) { el.parentNode.innerHTML = '<span style="background:#f9fafb;color:var(--muted);font-size:.85rem;padding:10px;border-radius:8px;text-align:center">Écartée</span>'; }
   function swipeYes(el) {
     var card = el.closest('.jobcard');
     card.style.borderColor = 'var(--green)';
-    el.parentNode.innerHTML = '<span style="background:#f0fdf4;color:var(--green);font-size:.85rem;padding:10px;border-radius:8px;text-align:center;font-weight:700">✓ Suivie</span>';
+    el.parentNode.innerHTML = '<span style="background:#f0fdf4;color:var(--green);font-size:.85rem;padding:10px;border-radius:8px;text-align:center;font-weight:700">Suivie</span>';
   }
   document.getElementById('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
   document.getElementById('city').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
