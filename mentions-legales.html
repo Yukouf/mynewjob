@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mentions légales · MYNEWJOB · MYNEWJOB</title>
+<title>Mentions légales · MYNEWJOB</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
       <a href="ia.html">Assistance IA</a>
       <a href="suivi.html">Suivi</a>
       <a href="index.html#tarifs">Tarifs</a>
-      <a class="btn ghost" href="#">Créer un compte</a>
+      <a class="btn" href="#">Créer un compte</a>
     </div>
   </div>
 </nav>
@@ -31,56 +31,58 @@
 </header>
 
 <section>
-  <div class="wrap" style="max-width:760px;font-size:.95rem;color:var(--muted)">
-<h3>Éditeur</h3>
-<p>Le site MYNEWJOB est édité par <strong>[Nom de l'éditeur à compléter]</strong>, [statut : micro-entreprise / SAS], dont le siège est situé [adresse à compléter].<br>
+  <div class="wrap" style="max-width:760px;font-size:.93rem">
+    
+<h3 style="margin:20px 0 8px;font-size:1rem">Éditeur</h3>
+<p style="margin-bottom:14px">Le site MYNEWJOB est édité par <strong>[Nom de l'éditeur à compléter]</strong>, [statut : micro-entreprise / SAS], dont le siège est situé [adresse à compléter].<br>
 SIRET : [à compléter] · Directeur de la publication : [à compléter].<br>
 Contact : contact@mynewjob.fr</p>
-<h3>Hébergement</h3>
-<p>Le site est hébergé par [nom et adresse de l'hébergeur à compléter].</p>
-<h3>Propriété intellectuelle</h3>
-<p>Les contenus du site (textes, structure, logo) sont la propriété de l'éditeur. Toute reproduction sans autorisation est interdite.</p>
-<h3>Responsabilité</h3>
-<p>MYNEWJOB agrège des offres d'emploi issues de sources publiques et n'est pas responsable du contenu publié par les entreprises tierces. Les offres restent soumises aux conditions de l'organisme qui les publie.</p>
+<h3 style="margin:20px 0 8px;font-size:1rem">Hébergement</h3>
+<p style="margin-bottom:14px">Le site est hébergé par [nom et adresse de l'hébergeur à compléter].</p>
+<h3 style="margin:20px 0 8px;font-size:1rem">Propriété intellectuelle</h3>
+<p style="margin-bottom:14px">Les contenus du site (textes, structure, logo) sont la propriété de l'éditeur. Toute reproduction sans autorisation est interdite.</p>
+<h3 style="margin:20px 0 8px;font-size:1rem">Responsabilité</h3>
+<p style="margin-bottom:14px">MYNEWJOB agrège des offres d'emploi issues de sources publiques et n'est pas responsable du contenu publié par les entreprises tierces.</p>
 
   </div>
 </section>
 
 <footer>
-  <div class="wrap" style="flex-direction:column;align-items:flex-start;gap:24px">
-    <div style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:24px">
+  <div class="wrap">
+    <div>
+      <div class="logo" style="margin-bottom:8px">MYNEW<span>JOB</span></div>
+      <small>Alternance, stage et CDI.</small>
+    </div>
+    <div class="cols">
       <div>
-        <div class="logo" style="margin-bottom:8px">MYNEW<span>JOB</span></div>
-        <small>Alternance, stage et CDI.</small>
+        <b>Produit</b>
+        <a href="feed.html">Offres</a><br>
+        <a href="marche-cache.html">Marché caché</a><br>
+        <a href="ia.html">Assistance IA</a><br>
+        <a href="suivi.html">Suivi</a>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:40px">
-        <div>
-          <div style="font-weight:700;margin-bottom:10px;color:#fff">Produit</div>
-          <small><a href="feed.html">Offres</a></small><br>
-          <small><a href="marche-cache.html">Marché caché</a></small><br>
-          <small><a href="ia.html">Assistance IA</a></small><br>
-          <small><a href="suivi.html">Suivi</a></small>
-        </div>
-        <div>
-          <div style="font-weight:700;margin-bottom:10px;color:#fff">Entreprise</div>
-          <small>Espace recruteur</small><br>
-          <small>Publier une offre</small><br>
-          <small>CVthèque</small>
-        </div>
-        <div>
-          <div style="font-weight:700;margin-bottom:10px;color:#fff">Légal</div>
-          <small><a href="mentions-legales.html">Mentions légales</a></small><br>
-          <small><a href="cgu.html">CGU</a></small><br>
-          <small><a href="confidentialite.html">Confidentialité</a></small><br>
-          <small>contact@mynewjob.fr</small>
-        </div>
+      <div>
+        <b>Entreprise</b>
+        <small>Espace recruteur</small><br>
+        <small>Publier une offre</small><br>
+        <small>CVthèque</small>
+      </div>
+      <div>
+        <b>Légal</b>
+        <a href="mentions-legales.html">Mentions légales</a><br>
+        <a href="cgu.html">CGU</a><br>
+        <a href="confidentialite.html">Confidentialité</a>
       </div>
     </div>
-    <small>© 2026 MYNEWJOB · Paiement sécurisé par Stripe · Données hébergées en UE (RGPD)</small>
+    <div class="legal">
+      <span>© 2026 MYNEWJOB · contact@mynewjob.fr</span>
+      <span>Paiement sécurisé par Stripe · Données hébergées en UE</span>
+    </div>
   </div>
 </footer>
 
 <div id="cookies">Ce site utilise uniquement les cookies nécessaires à son fonctionnement. <button class="btn" onclick="document.getElementById('cookies').style.display='none';localStorage.setItem('mnj_cookies','1')">Accepter</button></div>
 <script>if(!localStorage.getItem('mnj_cookies')){document.getElementById('cookies').style.display='flex'}</script>
+
 </body>
 </html>

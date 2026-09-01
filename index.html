@@ -20,7 +20,7 @@
       <a href="ia.html">Assistance IA</a>
       <a href="suivi.html">Suivi</a>
       <a href="#tarifs">Tarifs</a>
-      <a class="btn ghost" href="#">Créer un compte</a>
+      <a class="btn" href="#">Créer un compte</a>
     </div>
   </div>
 </nav>
@@ -28,20 +28,26 @@
 <header class="hero wrap">
   <span class="kicker">Recherche d'emploi assistée</span>
   <h1>Trouvez votre <em>alternance</em>, votre stage ou votre CDI.</h1>
-  <p>Offres agrégées, score de compatibilité sur votre profil, lettres et CV préparés par IA.</p>
+  <p>Offres agrégées, compatibilité calculée sur votre profil, candidatures préparées par IA.</p>
   <div class="ctas">
-    <a class="btn" href="#">Créer un compte →</a>
-    <a class="btn ghost" href="#offres">Voir les offres</a>
+    <a class="btn" href="#">Créer un compte</a>
+    <a class="btn ghost" href="#fonctionnement">Comment ça marche</a>
   </div>
-  <div class="searchbar">
-    <input id="q" type="text" placeholder="Métier ou mot-clé">
-    <input id="city" type="text" placeholder="Ville">
-    <button onclick="doSearch()">Rechercher</button>
+
+  <div class="window">
+    <div class="bar"><i></i><i></i><i></i><span>mynewjob.fr</span></div>
+    <div class="body">
+      <div class="searchbar">
+        <input id="q" type="text" placeholder="Métier ou mot-clé">
+        <input id="city" type="text" placeholder="Ville">
+        <button onclick="doSearch()">Rechercher</button>
+      </div>
+      <div id="results" style="margin-top:16px;display:none"></div>
+    </div>
   </div>
-  <div id="results" style="text-align:left;max-width:680px;margin:30px auto 0;display:none"></div>
 </header>
 
-<section class="stats-section">
+<section style="padding:72px 0">
   <div class="wrap stats">
     <div class="t"><strong>400 000+</strong><span>entreprises identifiées</span></div>
     <div class="t"><strong>100+</strong><span>sources agrégées</span></div>
@@ -50,21 +56,21 @@
   </div>
 </section>
 
-<section id="offres">
+<section id="fonctionnement">
   <div class="wrap">
-    <div class="sec-head"><h2>Comment ça fonctionne</h2></div>
+    <div class="sec-head"><span class="kicker">Fonctionnement</span><h2>Trois étapes.</h2></div>
     <div class="steps">
-      <div class="step"><div class="num">1</div><h3>Déposez votre CV</h3><p>Une seule fois. Votre profil est analysé pour évaluer chaque offre.</p></div>
-      <div class="step"><div class="num">2</div><h3>Consultez les offres</h3><p>Chaque offre reçoit un score de compatibilité. <a href="feed.html">Voir le feed →</a></p></div>
-      <div class="step"><div class="num">3</div><h3>Candidatures préparées</h3><p>Lettre et CV adaptés au poste, au format compatible ATS. <a href="ia.html">Assistance IA →</a></p></div>
+      <div class="step"><div class="num">01</div><h3>Déposez votre CV</h3><p>Une seule fois. Votre profil est analysé pour évaluer chaque offre.</p></div>
+      <div class="step"><div class="num">02</div><h3>Consultez les offres</h3><p>Chaque offre reçoit un score de compatibilité. <a href="feed.html">Voir les offres →</a></p></div>
+      <div class="step"><div class="num">03</div><h3>Préparez vos candidatures</h3><p>Lettre et CV adaptés au poste, au format compatible ATS. <a href="ia.html">Assistance IA →</a></p></div>
     </div>
   </div>
 </section>
 
 <section id="tarifs" class="alt">
   <div class="wrap">
-    <div class="sec-head"><h2>Tarifs</h2>
-    <p>Recherche gratuite et illimitée. Options payantes pour la préparation des candidatures.</p></div>
+    <div class="sec-head"><span class="kicker">Tarifs</span><h2>Un prix simple.</h2>
+    <p>Recherche gratuite et illimitée. Préparation des candidatures en option.</p></div>
     <div class="plans">
       <div class="plan">
         <h3>Découverte</h3>
@@ -79,7 +85,7 @@
         <a class="btn ghost" href="#">Créer un compte</a>
       </div>
       <div class="plan pop">
-        <span class="rec">RECOMMANDÉ</span>
+        <span class="rec">Recommandé</span>
         <h3>Pro</h3>
         <div class="price">39 €<small>/mois</small></div>
         <div class="sub">Résiliable à tout moment</div>
@@ -87,11 +93,11 @@
           <li>Tout Découverte, plus :</li>
           <li>Candidatures au marché caché</li>
           <li>Email du décideur</li>
-          <li>Lettres et CV IA illimités</li>
-          <li>Analyse de compatibilité détaillée</li>
+          <li>Lettres et CV illimités</li>
+          <li>Analyse détaillée</li>
           <li>Alertes sur les nouvelles offres</li>
         </ul>
-        <a class="btn" href="#">Commencer Pro →</a>
+        <a class="btn" href="#">Commencer Pro</a>
       </div>
       <div class="plan">
         <h3>Entreprise</h3>
@@ -106,7 +112,7 @@
         <a class="btn ghost" href="#">Espace entreprise</a>
       </div>
     </div>
-    <div class="trust" style="margin-top:48px">
+    <div class="trust">
       <div class="t"><strong>Paiement sécurisé</strong><span>Carte traitée par Stripe.</span></div>
       <div class="t"><strong>Résiliation en 1 clic</strong><span>Depuis vos réglages.</span></div>
       <div class="t"><strong>Remboursement 30 jours</strong><span>Si le service ne vous aide pas.</span></div>
@@ -117,9 +123,9 @@
 
 <section id="faq">
   <div class="wrap">
-    <div class="sec-head"><h2>Questions fréquentes</h2></div>
+    <div class="sec-head"><span class="kicker">FAQ</span><h2>Questions fréquentes</h2></div>
     <div class="faq">
-      <details><summary>Qu'est-ce que MYNEWJOB ?</summary><p>Un moteur de recherche d'alternance, de stage et de CDI qui agrège les offres (France Travail, La Bonne Alternance), identifie les entreprises qui recrutent sans annonce, et prépare les candidatures avec une assistance IA.</p></details>
+      <details><summary>Qu'est-ce que MYNEWJOB ?</summary><p>Un moteur de recherche d'alternance, de stage et de CDI qui agrège les offres, identifie les entreprises qui recrutent sans annonce, et prépare les candidatures avec une assistance IA.</p></details>
       <details><summary>La recherche est-elle gratuite ?</summary><p>Oui, sans limite. Le plan Pro ajoute la préparation illimitée des lettres et CV.</p></details>
       <details><summary>Qu'est-ce que le marché caché ?</summary><p>Des entreprises qui recrutent sans publier d'offre. MYNEWJOB identifie le bon contact pour une candidature spontanée ciblée.</p></details>
       <details><summary>Les documents générés sont-ils compatibles ATS ?</summary><p>Oui : texte sélectionnable, structure standard, lisibles par les logiciels de recrutement.</p></details>
@@ -128,38 +134,41 @@
 </section>
 
 <footer>
-  <div class="wrap" style="flex-direction:column;align-items:flex-start;gap:24px">
-    <div style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:24px">
+  <div class="wrap">
+    <div>
+      <div class="logo" style="margin-bottom:8px">MYNEW<span>JOB</span></div>
+      <small>Alternance, stage et CDI.</small>
+    </div>
+    <div class="cols">
       <div>
-        <div class="logo" style="margin-bottom:8px">MYNEW<span>JOB</span></div>
-        <small>Alternance, stage et CDI.</small>
+        <b>Produit</b>
+        <a href="feed.html">Offres</a><br>
+        <a href="marche-cache.html">Marché caché</a><br>
+        <a href="ia.html">Assistance IA</a><br>
+        <a href="suivi.html">Suivi</a>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:40px">
-        <div>
-          <div style="font-weight:700;margin-bottom:10px;color:#fff">Produit</div>
-          <small><a href="feed.html">Offres</a></small><br>
-          <small><a href="marche-cache.html">Marché caché</a></small><br>
-          <small><a href="ia.html">Assistance IA</a></small><br>
-          <small><a href="suivi.html">Suivi</a></small>
-        </div>
-        <div>
-          <div style="font-weight:700;margin-bottom:10px;color:#fff">Entreprise</div>
-          <small>Espace recruteur</small><br>
-          <small>Publier une offre</small><br>
-          <small>CVthèque</small>
-        </div>
-        <div>
-          <div style="font-weight:700;margin-bottom:10px;color:#fff">Légal</div>
-          <small><a href="mentions-legales.html">Mentions légales</a></small><br>
-          <small><a href="cgu.html">CGU</a></small><br>
-          <small><a href="confidentialite.html">Confidentialité</a></small><br>
-          <small>contact@mynewjob.fr</small>
-        </div>
+      <div>
+        <b>Entreprise</b>
+        <small>Espace recruteur</small><br>
+        <small>Publier une offre</small><br>
+        <small>CVthèque</small>
+      </div>
+      <div>
+        <b>Légal</b>
+        <a href="mentions-legales.html">Mentions légales</a><br>
+        <a href="cgu.html">CGU</a><br>
+        <a href="confidentialite.html">Confidentialité</a>
       </div>
     </div>
-    <small>© 2026 MYNEWJOB · Paiement sécurisé par Stripe · Données hébergées en UE (RGPD)</small>
+    <div class="legal">
+      <span>© 2026 MYNEWJOB · contact@mynewjob.fr</span>
+      <span>Paiement sécurisé par Stripe · Données hébergées en UE</span>
+    </div>
   </div>
 </footer>
+
+<div id="cookies">Ce site utilise uniquement les cookies nécessaires à son fonctionnement. <button class="btn" onclick="document.getElementById('cookies').style.display='none';localStorage.setItem('mnj_cookies','1')">Accepter</button></div>
+<script>if(!localStorage.getItem('mnj_cookies')){document.getElementById('cookies').style.display='flex'}</script>
 
 <script>
   var API = 'http://localhost:8123';
@@ -177,7 +186,7 @@
       var d = await r.json();
       lastOffers = d.offres || [];
       if (!lastOffers.length) { box.innerHTML = '<p>Aucune offre trouvée pour « ' + esc(q) + ' ».</p>'; return; }
-      box.innerHTML = '<p style="margin-bottom:14px">Source : ' + esc(d.source) + ' · ' + lastOffers.length + ' offre(s)</p>';
+      box.innerHTML = '<p style="margin-bottom:14px">' + esc(d.source) + ' · ' + lastOffers.length + ' offre(s)</p>';
       for (var i = 0; i < lastOffers.length; i++) box.appendChild(makeCard(lastOffers[i], i));
     } catch (e) {
       box.innerHTML = '<p>Service de recherche indisponible. Réessayez plus tard.</p>';
@@ -192,39 +201,21 @@
       '<h4>' + esc(o.title) + '</h4>' +
       '<div class="meta">' + esc(o.city || '') + '</div>' +
       '<div class="actions"><span class="no" onclick="swipeNo(this)">Écarter</span>' +
-      '<span class="yes" onclick="swipeYes(this)">Suivre</span></div>' +
-      '<button class="btn ghost" style="width:100%;margin-top:10px" onclick="genLetter(' + i + ')">Préparer ma lettre</button>' +
-      '<div id="letter-' + i + '" style="display:none;margin-top:12px;white-space:pre-wrap;background:#f9fafb;border:1px solid var(--line);border-radius:8px;padding:14px;font-size:.9rem"></div>';
+      '<span class="yes" onclick="swipeYes(this)">Suivre</span></div>';
     fetch(API + '/api/score?text=' + encodeURIComponent((o.text || o.title || '') + ' ' + o.title))
       .then(function (r) { return r.json(); })
       .then(function (s) { var el = document.getElementById('score-' + i); if (el) el.textContent = s.score + '%'; });
     return div;
   }
-  async function genLetter(i) {
-    var o = lastOffers[i];
-    var box = document.getElementById('letter-' + i);
-    box.style.display = 'block';
-    box.textContent = 'Préparation en cours…';
-    try {
-      var r = await fetch(API + '/api/letter', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: o.title, company: o.company, details: o.text || '' })
-      });
-      var d = await r.json();
-      box.textContent = d.lettre || JSON.stringify(d);
-    } catch (e) { box.textContent = 'Service indisponible, réessayez plus tard.'; }
-  }
   function swipeNo(el) { el.parentNode.innerHTML = '<span style="background:#f9fafb;color:var(--muted);font-size:.85rem;padding:10px;border-radius:8px;text-align:center">Écartée</span>'; }
   function swipeYes(el) {
     var card = el.closest('.jobcard');
     card.style.borderColor = 'var(--green)';
-    el.parentNode.innerHTML = '<span style="background:#f0fdf4;color:var(--green);font-size:.85rem;padding:10px;border-radius:8px;text-align:center;font-weight:700">Suivie</span>';
+    el.parentNode.innerHTML = '<span style="background:#f0fdf4;color:var(--green);font-size:.85rem;padding:10px;border-radius:8px;text-align:center;font-weight:600">Suivie</span>';
   }
   document.getElementById('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
   document.getElementById('city').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
 </script>
 
-<div id="cookies">Ce site utilise uniquement les cookies nécessaires à son fonctionnement. <button class="btn" onclick="document.getElementById('cookies').style.display='none';localStorage.setItem('mnj_cookies','1')">Accepter</button></div>
-<script>if(!localStorage.getItem('mnj_cookies')){document.getElementById('cookies').style.display='flex'}</script>
 </body>
 </html>
