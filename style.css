@@ -26,15 +26,15 @@
   .btn.ghost:hover { filter:brightness(.97); }
 
   /* HERO (pleine largeur, fond sombre) */
-  .hero { text-align:center; padding:96px 0 70px; background:var(--dark);
-          background-image:radial-gradient(900px 400px at 20% -10%, rgba(99,102,241,.35), transparent 60%),
-                           radial-gradient(700px 350px at 85% 0%, rgba(139,92,246,.28), transparent 60%); }
+  .hero { text-align:center; padding:130px 0 90px; background:var(--dark);
+          background-image:radial-gradient(900px 400px at 20% -10%, rgba(99,102,241,.3), transparent 60%),
+                           radial-gradient(700px 350px at 85% 0%, rgba(139,92,246,.22), transparent 60%); }
   .hero .kicker { display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
                   color:#a5b4fc; background:rgba(99,102,241,.15); border:1px solid rgba(129,140,248,.3);
-                  padding:6px 16px; border-radius:99px; margin-bottom:22px; }
-  .hero h1 { font-size:2.8rem; line-height:1.12; letter-spacing:-.5px; color:#fff; }
+                  padding:6px 16px; border-radius:99px; margin-bottom:26px; }
+  .hero h1 { font-size:3.5rem; line-height:1.08; letter-spacing:-1px; color:#fff; max-width:900px; margin:0 auto; }
   .hero h1 em { font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .hero p { color:#94a3b8; max-width:640px; margin:20px auto 30px; font-size:1.1rem; }
+  .hero p { color:#94a3b8; max-width:620px; margin:22px auto 34px; font-size:1.15rem; }
   .hero .ctas .btn { margin:0 8px; }
   .hero .ctas .btn.ghost { background:rgba(255,255,255,.08); color:#e2e8f0; border:1px solid rgba(255,255,255,.22); box-shadow:none; }
   .searchbar { max-width:680px; margin:44px auto 0; display:flex; background:rgba(255,255,255,.07);
@@ -64,21 +64,21 @@
   .matchcard .mini-ctas a:last-child { background:var(--acc-soft); color:var(--acc); }
 
   /* SECTIONS */
-  section { padding:88px 0; border-top:1px solid var(--line); }
-  section.alt { background:#f8fafc; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
-  .stats-section { padding:56px 0; }
-  .stats-section .wrap { border-bottom:1px solid var(--line); padding-bottom:8px; }
-  .sec-head { text-align:center; max-width:640px; margin:0 auto 52px; }
+  section { padding:120px 0; }
+  section.alt { background:#f5f5f7; border-top:none; border-bottom:none; }
+  .stats-section { padding:72px 0; }
+  .stats-section .wrap { border-bottom:1px solid var(--line); padding-bottom:16px; }
+  .sec-head { text-align:center; max-width:640px; margin:0 auto 56px; }
   .sec-head .kicker { display:block; font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
-                      color:var(--acc); margin-bottom:12px; }
-  .sec-head h2 { font-size:2.1rem; letter-spacing:-.4px; margin-bottom:12px; }
+                      color:var(--acc); margin-bottom:14px; }
+  .sec-head h2 { font-size:2.4rem; letter-spacing:-.6px; margin-bottom:14px; }
   .sec-head p { color:var(--muted); }
 
   /* STEPS */
   .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
-  .step { background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:30px;
+  .step { background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:34px;
           transition:transform .18s ease, box-shadow .18s ease; }
-  .step:hover { transform:translateY(-4px); box-shadow:0 18px 40px -18px rgba(15,23,42,.18); }
+  .step:hover { transform:translateY(-4px); box-shadow:0 18px 40px -18px rgba(15,23,42,.14); }
   .step .num { width:38px; height:38px; border-radius:11px; background:var(--grad); color:#fff;
                font-weight:800; display:flex; align-items:center; justify-content:center; margin-bottom:16px;
                font-family:'Sora',sans-serif; }
@@ -87,9 +87,9 @@
 
   /* SWIPE MOCK */
   .swipe { display:grid; grid-template-columns:1fr 1fr; gap:44px; align-items:center; }
-  .jobcard { background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:24px; margin-bottom:16px;
-             box-shadow:0 10px 30px rgba(15,23,42,.08); max-width:400px; transition:transform .18s ease, box-shadow .18s ease; }
-  .jobcard:hover { transform:translateY(-3px); box-shadow:0 20px 44px -16px rgba(15,23,42,.18); }
+  .jobcard { background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:26px; margin-bottom:16px;
+             max-width:400px; transition:transform .18s ease, box-shadow .18s ease; }
+  .jobcard:hover { transform:translateY(-3px); box-shadow:0 20px 44px -16px rgba(15,23,42,.14); }
   .jobcard .row { display:flex; justify-content:space-between; align-items:center; }
   .jobcard .tag { font-size:.75rem; background:var(--acc-soft); color:var(--acc); padding:4px 12px; border-radius:99px; font-weight:600; }
   .jobcard .pct { font-size:1.25rem; font-weight:800; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
@@ -180,18 +180,18 @@
   footer small { color:#64748b; }
 
   /* PAGE HEAD (pages internes) */
-  .pagehead { text-align:center; padding:70px 0 40px; background:var(--dark);
+  .pagehead { text-align:center; padding:100px 0 56px; background:var(--dark);
               background-image:radial-gradient(700px 300px at 30% -20%, rgba(99,102,241,.3), transparent 60%); }
   .pagehead .kicker { display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
                       color:#a5b4fc; background:rgba(99,102,241,.15); border:1px solid rgba(129,140,248,.3);
-                      padding:6px 16px; border-radius:99px; margin-bottom:20px; }
-  .pagehead h1 { font-size:2.4rem; letter-spacing:-.4px; color:#fff; }
+                      padding:6px 16px; border-radius:99px; margin-bottom:22px; }
+  .pagehead h1 { font-size:2.8rem; letter-spacing:-.6px; color:#fff; }
   .pagehead p { color:#94a3b8; max-width:600px; margin:14px auto 0; font-size:1.05rem; }
 
   /* STATS */
   .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; text-align:center; }
   .stats .t { padding:20px; }
-  .stats .t strong { display:block; font-size:1.7rem; font-family:'Sora',sans-serif;
+  .stats .t strong { display:block; font-size:2.1rem; font-family:'Sora',sans-serif;
                      background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
   .stats .t span { color:var(--muted); font-size:.9rem; }
 
@@ -223,12 +223,12 @@
   @media (max-width:820px) {
     .steps, .filters, .plans, .trust, .board, .stats, .feature .points { grid-template-columns:1fr; }
     .swipe, .market, .ai, .compare { grid-template-columns:1fr; }
-    .hero h1 { font-size:1.9rem; }
+    .hero h1 { font-size:2.4rem; }
     .searchbar { flex-direction:column; }
-    .searchbar input:last-of-type { max-width:none; border-left:none; border-top:1px solid var(--line); }
+    .searchbar input:last-of-type { max-width:none; border-left:none; border-top:1px solid rgba(255,255,255,.14); }
     .searchbar button { padding:16px; }
-    section { padding:56px 0; }
-    .sec-head h2 { font-size:1.6rem; }
+    section { padding:72px 0; }
+    .sec-head h2 { font-size:1.9rem; }
     nav .links a { margin-left:14px; font-size:.9rem; }
     .jobcard, .contactcard, .letter { max-width:100%; }
   }
@@ -238,8 +238,8 @@
     nav .links { display:flex; width:100%; justify-content:space-between; }
     nav .links a:not(.btn) { display:none; }  /* garde uniquement le CTA sur très petit écran */
     nav .links .btn { flex:1; text-align:center; }
-    .hero { padding:44px 0 24px; }
-    .hero h1 { font-size:1.55rem; }
+    .hero { padding:70px 0 40px; }
+    .hero h1 { font-size:1.75rem; }
     .hero p { font-size:1rem; }
     .ctas { display:flex; flex-direction:column; gap:12px; }
     .ctas .btn { text-align:center; }
@@ -260,7 +260,7 @@
   }
 
   @media (max-width:420px) {
-    .hero h1 { font-size:1.35rem; }
+    .hero h1 { font-size:1.5rem; }
     .hero p { font-size:.95rem; }
     .sec-head h2 { font-size:1.4rem; }
     .step, .filter, .box { padding:20px; }
