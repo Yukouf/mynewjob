@@ -424,5 +424,6 @@ class Handler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     init_db()
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
-    print(f"MYNEWJOB v2 sur http://localhost:{port} (site + API) — Ctrl+C pour arrêter")
-    ThreadingHTTPServer(("0.0.0.0", port), Handler).serve_forever()
+    host = sys.argv[2] if len(sys.argv) > 2 else "127.0.0.1"
+    print(f"MYNEWJOB v2 sur http://{host}:{port} (site + API) — Ctrl+C pour arrêter")
+    ThreadingHTTPServer((host, port), Handler).serve_forever()
