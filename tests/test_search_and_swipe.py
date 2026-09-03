@@ -32,6 +32,8 @@ class SemanticSearchTests(unittest.TestCase):
             "juridique": "Juriste",
             "communication digitale": "Marketing",
             "graphisme": "Designer",
+            "vente": "Commercial",
+            "commerce": "Business Developer",
         }
         for query, title in cases.items():
             with self.subTest(query=query):
@@ -49,6 +51,7 @@ class SemanticSearchTests(unittest.TestCase):
             "rh": "rh",
             "juridique": "droit",
             "graphisme": "design",
+            "vente": "vente",
         }.items():
             with self.subTest(query=query):
                 offers = app.search_offers(query)

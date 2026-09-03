@@ -151,6 +151,12 @@ SAMPLE_OFFERS = [
      "text": "Figma, UX, UI, maquettes, design system, recherche utilisateur. Alternance."},
     {"title": "Technicien Systèmes & Réseaux", "company": "NetWork", "city": "Nantes",
      "text": "Linux, Windows Server, réseaux, virtualisation, support N2. 30-38k€."},
+    {"title": "Commercial B2B (H/F)", "company": "Venteo", "city": "Paris",
+     "text": "Prospection, négociation, relation client, développement de portefeuille. CDI 32-45k€ + variable."},
+    {"title": "Business Developer", "company": "GrowthCo", "city": "Paris",
+     "text": "Développement commercial, acquisition de clients, négociation, suivi CRM. 35-50k€."},
+    {"title": "Conseiller de vente", "company": "RetailPro", "city": "Lyon",
+     "text": "Vente, conseil client, merchandising, encaissement. CDD ou CDI."},
 ]
 
 # Mots-clés par domaine (pour le feed « selon ton CV »)
@@ -168,6 +174,9 @@ DOMAIN_KEYWORDS = {
     "rh": ["recrutement", "paie", "droit du travail", "ressources humaines", "relations sociales"],
     "droit": ["droit", "juriste", "contrat", "réglementation", "reglementation", "compliance"],
     "design": ["design", "figma", "ux", "ui", "maquette", "graphisme", "design system"],
+    "vente": ["vente", "ventes", "commercial", "commerciale", "commerce", "négociation", "negociation",
+              "prospection", "relation client", "business developer", "account manager",
+              "conseiller de vente", "retail", "distribution", "business development"],
 }
 
 # Synonymes et abréviations saisis naturellement par les candidats.
@@ -181,6 +190,8 @@ DOMAIN_ALIASES = {
     "rh": ["rh", "ressources humaines", "recrutement", "talent acquisition", "paie"],
     "droit": ["droit", "juridique", "juriste", "legal", "compliance"],
     "design": ["design", "graphisme", "ux", "ui", "ux ui", "product design", "figma"],
+    "vente": ["vente", "ventes", "commercial", "commerce", "sales", "bizdev", "business dev",
+              "business developer", "account manager", "distribution"],
 }
 
 DOMAIN_LABELS = {
@@ -192,6 +203,7 @@ DOMAIN_LABELS = {
     "rh": "ressources humaines",
     "droit": "droit juridique",
     "design": "design UX UI",
+    "vente": "vente commerce commercial",
 }
 
 def kw_match(text, kw):
