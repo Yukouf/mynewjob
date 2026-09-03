@@ -302,11 +302,29 @@ MIME = {".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
         ".svg": "image/svg+xml", ".ico": "image/x-icon"}
 
 class Handler(BaseHTTPRequestHandler):
+    MAX_BODY = 8 * 1024 * 1024
+    ALLOWED_ORIGINS = {"https://yukouf.github.io", "http://127.0.0.1:8123", "http://localhost:8123"}
+
+    def _cors(self):
+        origin = self.headers.get("Origin", "")
+        if origin in self.ALLOWED_ORIGINS:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header("Access-Control-Max-Age", "86400")
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self._cors()
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
     def _json(self, obj, code=200):
         b = json.dumps(obj, ensure_ascii=False).encode()
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self._cors()
         self.send_header("Content-Length", str(len(b)))
         self.end_headers()
         self.wfile.write(b)
@@ -364,7 +382,14 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urllib.parse.urlparse(self.path)
-        n = int(self.headers.get("Content-Length", 0))
+        try:
+            n = int(self.headers.get("Content-Length", 0))
+        except (TypeError, ValueError):
+            self._json({"error": "Content-Length invalide"}, 400)
+            return
+        if n > self.MAX_BODY:
+            self._json({"error": "fichier trop volumineux (6 Mo maximum)"}, 413)
+            return
         try:
             data = json.loads(self.rfile.read(n) or b"{}")
         except Exception:

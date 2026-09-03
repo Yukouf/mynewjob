@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -114,7 +114,7 @@
 <script>if(!localStorage.getItem('mnj_cookies')){document.getElementById('cookies').style.display='flex'}</script>
 
 <script>
-  var API = 'http://localhost:8123';
+  var API = 'https://api-147-79-101-212.sslip.io';
   var offers = [], index = 0, followed = 0, cardEl = null, drag = null;
 
   // ── Import du CV ──────────────────────────────────────────────
@@ -131,14 +131,22 @@
 
   function handleFile(file) {
     if (!file.name.toLowerCase().endsWith('.pdf')) { alert('Format accepté : PDF'); return; }
+    if (file.size > 6 * 1024 * 1024) { alert('Le CV doit faire moins de 6 Mo.'); return; }
+    var label = dz.querySelector('p');
+    var original = label.innerHTML;
+    label.textContent = 'Analyse du CV en cours…';
+    dz.style.pointerEvents = 'none';
     var r = new FileReader();
     r.onload = function () {
       var b64 = r.result.split(',')[1];
       fetch(API + '/api/parse-cv', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pdf: b64 })
-      }).then(function (res) { return res.json(); }).then(function (d) {
-        if (d.error) { alert(d.error); return; }
+      }).then(function (res) {
+        if (!res.ok) throw new Error('Erreur API ' + res.status);
+        return res.json();
+      }).then(function (d) {
+        if (d.error) throw new Error(d.error);
         dz.style.display = 'none';
         var box = document.getElementById('cv-result');
         box.style.display = 'block';
@@ -150,7 +158,16 @@
         });
         document.getElementById('q').value = d.domaine;
         loadFeed();
+      }).catch(function (err) {
+        alert('Analyse du CV impossible : ' + err.message);
+        label.innerHTML = original;
+        dz.style.pointerEvents = '';
       });
+    };
+    r.onerror = function () {
+      alert('Lecture du fichier impossible.');
+      label.innerHTML = original;
+      dz.style.pointerEvents = '';
     };
     r.readAsDataURL(file);
   }
@@ -163,13 +180,20 @@
     document.getElementById('step-feed').style.display = 'block';
     document.getElementById('deck-end').style.display = 'none';
     fetch(API + '/api/feed?q=' + encodeURIComponent(q))
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r.ok) throw new Error('Erreur API ' + r.status);
+        return r.json();
+      })
       .then(function (d) {
         offers = d.offres || []; index = 0; followed = 0;
         document.getElementById('feed-title').textContent = 'Offres · ' + d.domaine + ' · ' + offers.length;
         buildDeck();
       })
-      .catch(function () { alert('Service de recherche indisponible.'); });
+      .catch(function (err) {
+        document.getElementById('step-feed').style.display = 'none';
+        document.getElementById('step-cv').style.display = 'block';
+        alert('Recherche indisponible : ' + err.message);
+      });
   }
 
   // ── Deck Tinder ───────────────────────────────────────────────
