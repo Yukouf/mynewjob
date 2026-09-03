@@ -224,7 +224,7 @@ def analyze_ats(text, domain):
     section_checks = ("experience", "formation", "competence")
     structure_points = sum(10 for heading in section_checks if heading in t)
     contact_points = 10 if re.search(r"[\w.+-]+@[\w.-]+\.[a-z]{2,}", t) else 0
-    keyword_points = min(60, len(present) * 8)
+    keyword_points = round(60 * len(present) / max(1, len(unique)))
     return {
         "score": min(100, keyword_points + structure_points + contact_points),
         "mots_cles_presents": present[:10],

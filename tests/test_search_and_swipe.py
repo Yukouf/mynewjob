@@ -70,7 +70,15 @@ class SemanticSearchTests(unittest.TestCase):
         self.assertIn("wazuh", analysis["mots_cles_presents"])
         self.assertIn("soc", analysis["mots_cles_presents"])
         self.assertTrue(analysis["mots_cles_a_valider"])
+        self.assertLess(analysis["score"], 100)
         self.assertTrue(all(k not in analysis["mots_cles_presents"] for k in analysis["mots_cles_a_valider"]))
+
+    def test_ats_score_cannot_be_perfect_when_domain_keywords_are_missing(self):
+        keywords = app.DOMAIN_KEYWORDS["cybersecurite"][:-1]
+        text = "Expérience Formation Compétences candidat@example.com " + " ".join(keywords)
+        analysis = app.analyze_ats(text, "cybersecurite")
+        self.assertTrue(analysis["mots_cles_a_valider"])
+        self.assertLess(analysis["score"], 100)
 
 
 class SwipeCopyTests(unittest.TestCase):
