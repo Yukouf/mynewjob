@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
@@ -40,10 +40,26 @@
     <div class="body">
       <div class="searchbar">
         <input id="q" type="text" placeholder="Métier ou mot-clé">
-        <input id="city" type="text" placeholder="Ville">
+        <input id="city" type="text" placeholder="Ville ou télétravail">
         <button onclick="doSearch()">Rechercher</button>
       </div>
-      <div id="results" style="margin-top:16px;display:none"></div>
+      <div id="results" style="margin-top:16px">
+        <div class="preview-label"><strong>Sélection pour votre profil</strong><span>Mise à jour aujourd'hui</span></div>
+        <div class="preview-jobs">
+          <article class="preview-job featured">
+            <span class="match">92%</span>
+            <small>Airbus Protect · Paris</small>
+            <h4>Analyste SOC niveau 2</h4>
+            <p>Wazuh · SIEM · Réponse à incident</p>
+          </article>
+          <article class="preview-job">
+            <span class="match">87%</span>
+            <small>Wavestone · Puteaux</small>
+            <h4>Consultant cybersécurité & IA</h4>
+            <p>Gouvernance · AI Act · NIS2</p>
+          </article>
+        </div>
+      </div>
     </div>
   </div>
 </header>
