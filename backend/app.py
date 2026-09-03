@@ -697,19 +697,22 @@ def build_ats_pdf(struct, validated_keywords):
             if f.get("meta"):
                 main.append(Paragraph(escape(f["meta"]), st["meta"]))
     out = BytesIO()
+    def sidebar_bg(canvas, doc):
+        canvas.saveState()
+        canvas.setFillColor(DARK)
+        canvas.rect(0, 0, 62*mm, A4[1], fill=1, stroke=0)
+        canvas.restoreState()
     doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=0, rightMargin=0, topMargin=0, bottomMargin=0,
                             title="CV — " + struct.get("nom", ""), author="MYNEWJOB")
     table = Table([[sidebar, main]], colWidths=[62*mm, 148*mm])
     table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (0, -1), DARK),
-        ("BACKGROUND", (1, 0), (1, -1), WHITE),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (0, -1), 20), ("RIGHTPADDING", (0, 0), (0, -1), 15),
         ("TOPPADDING", (0, 0), (0, -1), 20), ("BOTTOMPADDING", (0, 0), (0, -1), 18),
         ("LEFTPADDING", (1, 0), (1, -1), 26), ("RIGHTPADDING", (1, 0), (1, -1), 24),
         ("TOPPADDING", (1, 0), (1, -1), 22), ("BOTTOMPADDING", (1, 0), (1, -1), 18),
     ]))
-    doc.build([table])
+    doc.build([table], onFirstPage=sidebar_bg, onLaterPages=sidebar_bg)
     return out.getvalue()
 
 def rewrite_cv(pdf_b64, keywords, target=""):
