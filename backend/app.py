@@ -197,10 +197,13 @@ def feed_offers(q, domain=None):
     return {"domaine": dom, "offres": out[:10]}
 
 def search_offers(q, city=""):
-    q = normalize(q)
-    out = [o for o in SAMPLE_OFFERS if any(w in normalize(o["title"] + " " + o["text"] + " " + o["city"]) for w in q.split())] if q else []
-    if city and city.lower() not in ("paris", ""):
-        out = [o for o in out if city.lower() in o["city"].lower()]
+    qn = normalize(q)
+    out = [o for o in SAMPLE_OFFERS
+           if qn and any(w in normalize(o["title"] + " " + o["text"] + " " + o["city"])
+                         for w in qn.split())]
+    cityn = normalize(city)
+    if cityn:
+        out = [o for o in out if cityn in normalize(o["city"])]
     return out
 
 # ── Fournisseurs de recherche réels (clés en env) ────────────────────────────
