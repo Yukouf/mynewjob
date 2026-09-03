@@ -1,6 +1,8 @@
 import importlib.util
 import pathlib
 import unittest
+from io import BytesIO
+from pypdf import PdfReader
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location("mynewjob_app", ROOT / "backend" / "app.py")
@@ -80,6 +82,21 @@ class SemanticSearchTests(unittest.TestCase):
         self.assertTrue(analysis["mots_cles_a_valider"])
         self.assertLess(analysis["score"], 100)
 
+    def test_ats_pdf_contains_rewritten_content_and_validated_keywords(self):
+        content = "Youssef Exemple\nAnalyste SOC\nEXPÉRIENCE\nSupervision Wazuh.\nFORMATION\nMaster cybersécurité."
+        pdf = app.build_ats_pdf(content, ["SIEM", "réponse aux incidents"])
+        self.assertTrue(pdf.startswith(b"%PDF"))
+        extracted = "\n".join(page.extract_text() or "" for page in PdfReader(BytesIO(pdf)).pages)
+        self.assertIn("Youssef Exemple", extracted)
+        self.assertIn("COMPÉTENCES CIBLÉES", extracted)
+        self.assertIn("réponse aux incidents", extracted)
+
+    def test_fallback_rewrite_preserves_source_facts(self):
+        source = "Youssef Exemple\nTrois ans chez Exemple SA\nWazuh et Suricata"
+        rewritten = app.fallback_rewrite_cv(source)
+        self.assertIn("Trois ans chez Exemple SA", rewritten)
+        self.assertIn("Wazuh et Suricata", rewritten)
+
 
 class SwipeCopyTests(unittest.TestCase):
     def test_swipe_actions_use_business_wording(self):
@@ -103,6 +120,9 @@ class SwipeCopyTests(unittest.TestCase):
         self.assertIn('id="ats-score"', html)
         self.assertIn('id="ats-missing"', html)
         self.assertIn('onclick="copyAtsKeywords()"', html)
+        self.assertIn('onclick="generateAtsCv()"', html)
+        self.assertIn('id="ats-generate"', html)
+        self.assertIn("Générer mon CV ATS", html)
         self.assertIn("Mots-clés à valider", html)
 
 

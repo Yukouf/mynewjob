@@ -22,9 +22,11 @@ Clés (variables d'environnement) :
 Lancement : python3 app.py [port]  (défaut 8000). DB créée à côté : mynewjob.db
 """
 import json, os, re, secrets, sqlite3, sys, unicodedata, urllib.parse, urllib.request
-from base64 import b64decode
+from base64 import b64decode, b64encode
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from hashlib import pbkdf2_hmac
+from html import escape
+from io import BytesIO
 from pathlib import Path
 import tempfile
 
@@ -33,6 +35,18 @@ try:
     HAS_PYPDF = True
 except ImportError:
     HAS_PYPDF = False
+
+try:
+    from reportlab.lib.enums import TA_CENTER
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    HAS_REPORTLAB = True
+except ImportError:
+    HAS_REPORTLAB = False
 
 STATIC_DIR = Path(__file__).resolve().parent.parent   # sert le site (jobpilot/)
 DB_PATH = Path(__file__).resolve().parent / "mynewjob.db"
@@ -337,21 +351,104 @@ def template_letter(title, company, details=""):
           f"Disponible rapidement, je me tiens à votre disposition pour un entretien.\n\n"
           f"Cordialement,\nYoussef Guerniou")
 
+def extract_pdf_text(pdf_b64):
+    if not HAS_PYPDF:
+        raise RuntimeError("pypdf absent")
+    try:
+        raw = b64decode(pdf_b64, validate=True)
+        reader = PdfReader(BytesIO(raw))
+        text = "\n".join((page.extract_text() or "") for page in reader.pages)
+    except Exception as exc:
+        raise ValueError(f"PDF illisible : {exc}") from exc
+    if not text.strip():
+        raise ValueError("Aucun texte extrait (CV scanné en image ?)")
+    return text
+
+def fallback_rewrite_cv(source):
+    """Nettoie la structure sans modifier ni inventer les informations du CV."""
+    lines = [re.sub(r"\s+", " ", line).strip() for line in source.splitlines()]
+    return "\n".join(line for line in lines if line)
+
+def rewrite_cv_with_ai(source, keywords, target=""):
+    key = os.environ.get("DEEPSEEK_API_KEY", "")
+    if not key:
+        return fallback_rewrite_cv(source), "mise en page ATS"
+    system = (
+        "Vous réécrivez un CV en français dans un format ATS sobre, une colonne, texte brut. "
+        "Conservez strictement l'identité, les coordonnées, employeurs, dates, diplômes et faits fournis. "
+        "N'inventez aucune compétence, mission, durée ni résultat. Utilisez les mots-clés validés seulement "
+        "lorsqu'ils sont cohérents avec les faits du CV. Sections attendues : TITRE, PROFIL, COMPÉTENCES, "
+        "EXPÉRIENCES, FORMATION, CERTIFICATIONS, LANGUES. Ne produisez ni tableau, ni Markdown, ni commentaire."
+    )
+    user = (f"Métier ciblé : {target or 'domaine détecté'}\n"
+            f"Mots-clés validés par le candidat : {', '.join(keywords)}\n\nCV source :\n{source[:18000]}")
+    body = json.dumps({"model": "deepseek-chat", "messages": [
+        {"role": "system", "content": system}, {"role": "user", "content": user}],
+        "temperature": 0.1, "max_tokens": 2200}).encode()
+    req = urllib.request.Request("https://api.deepseek.com/chat/completions", data=body,
+                                 headers={"Content-Type": "application/json", "Authorization": "Bearer " + key})
+    try:
+        with urllib.request.urlopen(req, timeout=75) as response:
+            text = json.load(response)["choices"][0]["message"]["content"].strip()
+        return text or fallback_rewrite_cv(source), "IA"
+    except Exception:
+        return fallback_rewrite_cv(source), "mise en page ATS"
+
+def build_ats_pdf(content, validated_keywords):
+    if not HAS_REPORTLAB:
+        raise RuntimeError("reportlab absent")
+    regular = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    bold = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+    pdfmetrics.registerFont(TTFont("ATS-Regular", regular))
+    pdfmetrics.registerFont(TTFont("ATS-Bold", bold))
+    out = BytesIO()
+    doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=18*mm, rightMargin=18*mm,
+                            topMargin=16*mm, bottomMargin=16*mm,
+                            title="CV optimisé ATS", author="MYNEWJOB")
+    styles = getSampleStyleSheet()
+    normal = ParagraphStyle("ATSBody", parent=styles["BodyText"], fontName="ATS-Regular",
+                            fontSize=9.2, leading=12.2, spaceAfter=4)
+    heading = ParagraphStyle("ATSHeading", parent=normal, fontName="ATS-Bold", fontSize=11,
+                             leading=14, spaceBefore=8, spaceAfter=5, textColor="#312e81")
+    title = ParagraphStyle("ATSTitle", parent=heading, fontSize=16, leading=20,
+                           alignment=TA_CENTER, textColor="#111827", spaceAfter=10)
+    lines = [line.strip(" #*") for line in content.splitlines() if line.strip()]
+    story = []
+    if lines:
+        story.extend([Paragraph(escape(lines[0]), title), Spacer(1, 3*mm)])
+    headings = {"TITRE", "PROFIL", "COMPÉTENCES", "COMPETENCES", "EXPÉRIENCES", "EXPERIENCES",
+                "EXPÉRIENCE", "EXPERIENCE", "FORMATION", "CERTIFICATIONS", "LANGUES"}
+    for line in lines[1:]:
+        clean = line.strip(" -•\t")
+        style = heading if normalize(clean).upper() in {normalize(h).upper() for h in headings} or (clean.isupper() and 5 <= len(clean) < 45) else normal
+        story.append(Paragraph(escape(clean), style))
+    if validated_keywords:
+        story.append(Paragraph("COMPÉTENCES CIBLÉES", heading))
+        story.append(Paragraph(escape(" • ".join(validated_keywords)), normal))
+    doc.build(story)
+    return out.getvalue()
+
+def rewrite_cv(pdf_b64, keywords, target=""):
+    try:
+        source = extract_pdf_text(pdf_b64)
+        selected = []
+        for keyword in keywords if isinstance(keywords, list) else []:
+            clean = re.sub(r"[^\wÀ-ÿ +#./-]", "", str(keyword)).strip()[:50]
+            if clean and normalize(clean) not in [normalize(k) for k in selected]:
+                selected.append(clean)
+        content, mode = rewrite_cv_with_ai(source, selected[:12], str(target)[:100])
+        pdf = build_ats_pdf(content, selected[:12])
+        return {"pdf": b64encode(pdf).decode(), "filename": "CV_optimise_ATS.pdf", "mode": mode,
+                "mots_cles_valides": selected[:12]}
+    except Exception as exc:
+        return {"error": str(exc)}
+
 def parse_cv(pdf_b64):
     """Extrait le texte d'un CV PDF, détecte le domaine et les compétences."""
-    if not HAS_PYPDF:
-        return {"error": "pypdf absent : installez-le (pip install pypdf ou apt install python3-pypdf)"}
     try:
-        raw = b64decode(pdf_b64)
-        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=True) as f:
-            f.write(raw)
-            f.flush()
-            reader = PdfReader(f.name)
-            text = "\n".join((pg.extract_text() or "") for pg in reader.pages)
-    except Exception as e:
-        return {"error": f"PDF illisible : {e}"}
-    if not text.strip():
-        return {"error": "Aucun texte extrait (CV scanné en image ?)"}
+        text = extract_pdf_text(pdf_b64)
+    except Exception as exc:
+        return {"error": str(exc)}
     dom, dom_n = detect_domain(text)
     return {"domaine": dom, "confiance": dom_n, "competences": extract_skills(text),
             "ats": analyze_ats(text, dom), "mots": len(text.split()), "apercu": text[:400]}
@@ -497,6 +594,8 @@ class Handler(BaseHTTPRequestHandler):
             self._json({"ok": True})
         elif u.path == "/api/parse-cv":
             self._json(parse_cv(data.get("pdf", "")))
+        elif u.path == "/api/rewrite-cv":
+            self._json(rewrite_cv(data.get("pdf", ""), data.get("keywords", []), data.get("target", "")))
         elif u.path == "/api/letter":
             self._json(generate_letter(data.get("title", ""), data.get("company", ""), data.get("details", "")))
         else:
