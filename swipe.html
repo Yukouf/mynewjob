@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 
@@ -58,6 +58,15 @@
     <div id="step-feed" style="display:none">
       <div class="swipe-intro" style="margin-bottom:32px">
         <p id="feed-title">Offres du domaine</p>
+      </div>
+      <div class="ats-card" id="ats-box" style="display:none">
+        <div class="ats-score"><strong id="ats-score">0</strong><span>/100<br>Score ATS</span></div>
+        <div class="ats-copy">
+          <h3>Optimisez votre CV pour les ATS</h3>
+          <p>Mots-clés à valider avant ajout : <strong id="ats-missing"></strong></p>
+          <small>Ajoutez uniquement ceux qui correspondent réellement à votre expérience.</small>
+          <button class="btn ghost" id="ats-copy" onclick="copyAtsKeywords()">Copier les mots-clés</button>
+        </div>
       </div>
       <div class="deck" id="deck"></div>
       <div class="swipe-actions">
@@ -115,7 +124,7 @@
 
 <script>
   var API = 'https://api-147-79-101-212.sslip.io';
-  var offers = [], index = 0, followed = 0, cardEl = null, drag = null;
+  var offers = [], index = 0, followed = 0, cardEl = null, drag = null, atsKeywords = [];
 
   // ── Import du CV ──────────────────────────────────────────────
   var dz = document.getElementById('dropzone');
@@ -157,6 +166,11 @@
           var sp = document.createElement('span'); sp.textContent = s; chips.appendChild(sp);
         });
         document.getElementById('q').value = d.domaine;
+        var ats = d.ats || {};
+        atsKeywords = ats.mots_cles_a_valider || [];
+        document.getElementById('ats-score').textContent = ats.score || 0;
+        document.getElementById('ats-missing').textContent = atsKeywords.join(', ') || 'aucun mot-clé prioritaire';
+        document.getElementById('ats-box').style.display = 'flex';
         loadFeed();
       }).catch(function (err) {
         alert('Analyse du CV impossible : ' + err.message);
@@ -170,6 +184,16 @@
       dz.style.pointerEvents = '';
     };
     r.readAsDataURL(file);
+  }
+
+  function copyAtsKeywords() {
+    var text = atsKeywords.join(', ');
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(function () {
+      var btn = document.getElementById('ats-copy');
+      btn.textContent = 'Mots-clés copiés';
+      setTimeout(function () { btn.textContent = 'Copier les mots-clés'; }, 1800);
+    });
   }
 
   // ── Feed par domaine ──────────────────────────────────────────

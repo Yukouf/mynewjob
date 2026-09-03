@@ -207,10 +207,30 @@ def extract_skills(text):
     found = []
     for dom, kws in DOMAIN_KEYWORDS.items():
         for kw in kws:
-            if kw_match(t, kw) and kw not in found:
+            if kw_match(t, kw) and normalize(kw) not in [normalize(x) for x in found]:
                 found.append(kw)
     # limite l'affichage, dédoublonne les quasi-synonymes
     return found[:12]
+
+def analyze_ats(text, domain):
+    """Évalue la lisibilité ATS et propose uniquement des mots-clés à valider."""
+    t = normalize(text)
+    unique = []
+    for kw in DOMAIN_KEYWORDS.get(domain, []):
+        if normalize(kw) not in [normalize(x) for x in unique]:
+            unique.append(kw)
+    present = [kw for kw in unique if kw_match(t, kw)]
+    missing = [kw for kw in unique if not kw_match(t, kw)][:8]
+    section_checks = ("experience", "formation", "competence")
+    structure_points = sum(10 for heading in section_checks if heading in t)
+    contact_points = 10 if re.search(r"[\w.+-]+@[\w.-]+\.[a-z]{2,}", t) else 0
+    keyword_points = min(60, len(present) * 8)
+    return {
+        "score": min(100, keyword_points + structure_points + contact_points),
+        "mots_cles_presents": present[:10],
+        "mots_cles_a_valider": missing,
+        "conseil": "Ajoutez uniquement les mots-clés correspondant réellement à votre expérience.",
+    }
 
 def feed_offers(q, domain=None):
     """Offres du domaine, notées et triées (moteur du swipe)."""
@@ -334,7 +354,7 @@ def parse_cv(pdf_b64):
         return {"error": "Aucun texte extrait (CV scanné en image ?)"}
     dom, dom_n = detect_domain(text)
     return {"domaine": dom, "confiance": dom_n, "competences": extract_skills(text),
-            "mots": len(text.split()), "apercu": text[:400]}
+            "ats": analyze_ats(text, dom), "mots": len(text.split()), "apercu": text[:400]}
 
 # ── Serveur HTTP ─────────────────────────────────────────────────────────────
 MIME = {".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",

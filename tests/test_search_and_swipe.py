@@ -60,6 +60,18 @@ class SemanticSearchTests(unittest.TestCase):
         self.assertEqual("cybersécurité", app.canonical_search_query("cyber"))
         self.assertEqual("ressources humaines", app.canonical_search_query("rh"))
 
+    def test_ats_analysis_returns_score_and_domain_keywords(self):
+        analysis = app.analyze_ats(
+            "Analyste SOC avec expérience Wazuh, SIEM et réponse aux incidents. "
+            "Compétences et expériences professionnelles. Formation Master.",
+            "cybersecurite",
+        )
+        self.assertGreaterEqual(analysis["score"], 1)
+        self.assertIn("wazuh", analysis["mots_cles_presents"])
+        self.assertIn("soc", analysis["mots_cles_presents"])
+        self.assertTrue(analysis["mots_cles_a_valider"])
+        self.assertTrue(all(k not in analysis["mots_cles_presents"] for k in analysis["mots_cles_a_valider"]))
+
 
 class SwipeCopyTests(unittest.TestCase):
     def test_swipe_actions_use_business_wording(self):
@@ -76,6 +88,14 @@ class SwipeCopyTests(unittest.TestCase):
         html = (ROOT / "swipe.html").read_text(encoding="utf-8")
         self.assertIn("dx < 0 ? 'no' : 'yes'", html)
         self.assertIn("dir === 'yes' ? 'fly-right' : 'fly-left'", html)
+
+    def test_cv_import_proposes_ats_keywords(self):
+        html = (ROOT / "swipe.html").read_text(encoding="utf-8")
+        self.assertIn('id="ats-box"', html)
+        self.assertIn('id="ats-score"', html)
+        self.assertIn('id="ats-missing"', html)
+        self.assertIn('onclick="copyAtsKeywords()"', html)
+        self.assertIn("Mots-clés à valider", html)
 
 
 if __name__ == "__main__":
