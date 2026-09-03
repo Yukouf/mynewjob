@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 
@@ -61,14 +61,14 @@
       </div>
       <div class="deck" id="deck"></div>
       <div class="swipe-actions">
-        <button class="act no" onclick="swipe('no')" aria-label="Écarter">✕</button>
-        <button class="act yes" onclick="swipe('yes')" aria-label="Suivre">✓</button>
+        <button class="act no" onclick="swipe('no')" aria-label="Refuser">✕ <span>Refuser</span></button>
+        <button class="act yes" onclick="swipe('yes')" aria-label="Postuler">✓ <span>Postuler</span></button>
       </div>
       <div class="swipe-count" id="count">0 / 0</div>
       <div class="deck-end" id="deck-end">
         <h3 style="margin-bottom:12px">Vous avez parcouru toutes les offres.</h3>
         <p id="deck-summary" style="margin-bottom:24px"></p>
-        <a class="btn" href="suivi.html">Voir mes candidatures suivies</a>
+        <a class="btn" href="suivi.html">Voir mes candidatures</a>
       </div>
     </div>
 
@@ -216,7 +216,7 @@
     c.style.zIndex = offers.length - i;
     if (i < offers.length - 1) c.style.transform = 'scale(' + (1 - (offers.length - 1 - i) * 0.02) + ') translateY(' + (offers.length - 1 - i) * 8 + 'px)';
     c.innerHTML =
-      '<span class="badge no">NON</span><span class="badge yes">SUIVRE</span>' +
+      '<span class="badge no">REFUSER</span><span class="badge yes">POSTULER</span>' +
       '<div class="head"><span class="tag">' + esc(o.company || '') + '</span>' +
       '<span class="pct-big">' + o.score + '%</span></div>' +
       '<h3>' + esc(o.title) + '</h3>' +
@@ -274,8 +274,8 @@
     document.getElementById('count').textContent = '';
     document.getElementById('deck').innerHTML = '';
     document.getElementById('deck-end').style.display = 'block';
-    document.getElementById('deck-summary').textContent = followed + ' offre(s) suivie(s) sur ' + offers.length + '. ' +
-      (followed ? 'Elles apparaissent dans votre suivi.' : 'Aucune n\'a retenu votre attention.');
+    document.getElementById('deck-summary').textContent = followed + ' offre(s) à postuler sur ' + offers.length + '. ' +
+      (followed ? 'Elles apparaissent dans vos candidatures.' : 'Vous avez refusé toutes les offres.');
   }
   function esc(t) { var d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
 </script>

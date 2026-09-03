@@ -156,8 +156,33 @@ DOMAIN_KEYWORDS = {
     "design": ["design", "figma", "ux", "ui", "maquette", "graphisme", "design system"],
 }
 
+# Synonymes et abréviations saisis naturellement par les candidats.
+DOMAIN_ALIASES = {
+    "cybersecurite": ["cyber", "cybersec", "cybersecurite", "securite informatique", "secops", "blue team", "soc"],
+    "informatique": ["informatique", "it", "dev", "developpement", "programmation", "logiciel", "software",
+                     "systeme", "systemes et reseaux", "admin systeme", "support informatique", "devops", "cloud"],
+    "data": ["data", "donnees", "analyse de donnees", "data science", "business intelligence", "bi"],
+    "marketing": ["marketing", "communication", "communication digitale", "digital", "seo", "sea"],
+    "finance": ["finance", "compta", "comptabilite", "banque", "controle de gestion", "audit financier"],
+    "rh": ["rh", "ressources humaines", "recrutement", "talent acquisition", "paie"],
+    "droit": ["droit", "juridique", "juriste", "legal", "compliance"],
+    "design": ["design", "graphisme", "ux", "ui", "ux ui", "product design", "figma"],
+}
+
+DOMAIN_LABELS = {
+    "cybersecurite": "cybersécurité",
+    "informatique": "informatique",
+    "data": "data analyse de données",
+    "marketing": "marketing communication digitale",
+    "finance": "finance comptabilité",
+    "rh": "ressources humaines",
+    "droit": "droit juridique",
+    "design": "design UX UI",
+}
+
 def kw_match(text, kw):
     """Mot-clé avec frontières de mot pour les termes courts (évite « soc » dans « sociales »)."""
+    kw = normalize(kw)
     if len(kw) <= 4:
         return re.search(r"(?<![a-z0-9])" + re.escape(kw) + r"(?![a-z0-9])", text) is not None
     return kw in text
@@ -166,10 +191,16 @@ def detect_domain(text):
     t = normalize(text)
     best, best_n = None, 0
     for dom, kws in DOMAIN_KEYWORDS.items():
-        n = sum(1 for kw in kws if kw_match(t, kw))
+        aliases = DOMAIN_ALIASES.get(dom, [])
+        n = sum(1 for kw in [*aliases, *kws] if kw_match(t, kw))
         if n > best_n:
             best, best_n = dom, n
     return best or "informatique", best_n
+
+def canonical_search_query(q):
+    """Traduit une saisie courante vers un libellé compris par les moteurs d'offres."""
+    dom, confidence = detect_domain(q)
+    return DOMAIN_LABELS[dom] if confidence else (q or "").strip()
 
 def extract_skills(text):
     t = normalize(text)
@@ -198,9 +229,14 @@ def feed_offers(q, domain=None):
 
 def search_offers(q, city=""):
     qn = normalize(q)
-    out = [o for o in SAMPLE_OFFERS
-           if qn and any(w in normalize(o["title"] + " " + o["text"] + " " + o["city"])
-                         for w in qn.split())]
+    dom, confidence = detect_domain(qn)
+    if qn and confidence:
+        out = [o for o in SAMPLE_OFFERS
+               if detect_domain(o["title"] + " " + o["text"])[0] == dom]
+    else:
+        out = [o for o in SAMPLE_OFFERS
+               if qn and any(w in normalize(o["title"] + " " + o["text"] + " " + o["city"])
+                             for w in qn.split())]
     cityn = normalize(city)
     if cityn:
         out = [o for o in out if cityn in normalize(o["city"])]
@@ -236,9 +272,10 @@ def search_lba(q, city=""):
         return json.load(r)
 
 def search(q, city=""):
+    provider_q = canonical_search_query(q)
     for fn in (search_francetravail, search_lba):
         try:
-            r = fn(q, city)
+            r = fn(provider_q, city)
         except Exception:
             r = None
         if r is not None:

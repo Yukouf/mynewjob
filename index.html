@@ -218,8 +218,8 @@
       '<span class="pct" id="score-' + i + '">…%</span></div>' +
       '<h4>' + esc(o.title) + '</h4>' +
       '<div class="meta">' + esc(o.city || '') + '</div>' +
-      '<div class="actions"><span class="no" onclick="swipeNo(this)">Écarter</span>' +
-      '<span class="yes" onclick="swipeYes(this)">Suivre</span></div>';
+      '<div class="actions"><span class="no" onclick="swipeNo(this)">Refuser</span>' +
+      '<span class="yes" onclick="swipeYes(this)">Postuler</span></div>';
     fetch(API + '/api/score?text=' + encodeURIComponent((o.text || o.title || '') + ' ' + o.title))
       .then(function (r) { return r.json(); })
       .then(function (s) { var el = document.getElementById('score-' + i); if (el) el.textContent = s.score + '%'; });
