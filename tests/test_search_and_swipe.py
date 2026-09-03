@@ -61,6 +61,14 @@ class SemanticSearchTests(unittest.TestCase):
                     for offer in offers
                 ), offers)
 
+    def test_every_domain_resolves_to_its_own_offers(self):
+        for domain in app.DOMAIN_ALIASES:
+            alias = app.DOMAIN_ALIASES[domain][0]
+            offers = app.search_offers(alias)
+            self.assertTrue(offers, f"{domain}: aucun résultat pour {alias!r}")
+            wrong = [o for o in offers if app.detect_domain(o["title"] + " " + o["text"])[0] != domain]
+            self.assertFalse(wrong, f"{domain}: offres mal classées {[o['title'] for o in wrong]}")
+
     def test_external_provider_receives_canonical_domain(self):
         self.assertEqual("cybersécurité", app.canonical_search_query("cyber"))
         self.assertEqual("ressources humaines", app.canonical_search_query("rh"))
