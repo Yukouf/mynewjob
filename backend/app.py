@@ -624,35 +624,32 @@ def build_ats_pdf(struct, validated_keywords):
         raise RuntimeError("polices CV introuvables")
     INK = HexColor("#111827"); MUT = HexColor("#6b7280"); ACC = HexColor("#4f46e5")
     DARK = HexColor("#0f172a"); WHITE = HexColor("#ffffff")
-    SLT = HexColor("#cbd5e1"); SMUT = HexColor("#94a3b8"); SA = HexColor("#818cf8")
+    SLT = HexColor("#e2e8f0"); SMUT = HexColor("#94a3b8"); SA = HexColor("#a5b4fc")
     st = {
-        "name": ParagraphStyle("name", fontName="Sora-Extra", fontSize=23, leading=27, textColor=WHITE),
-        "title": ParagraphStyle("title", fontName="Inter-Sem", fontSize=10, leading=14, textColor=SA),
-        "avatar": ParagraphStyle("avatar", fontName="Sora-Extra", fontSize=16, leading=18, textColor=WHITE, alignment=TA_CENTER),
-        "shead": ParagraphStyle("shead", fontName="Inter-Bold", fontSize=9, leading=12, textColor=SA, spaceBefore=10, spaceAfter=4),
-        "sval": ParagraphStyle("sval", fontName="Inter", fontSize=8.4, leading=12.5, textColor=SLT),
-        "stag": ParagraphStyle("stag", fontName="Inter-Med", fontSize=8.4, leading=12.5, textColor=SLT, spaceBefore=5),
-        "mhead": ParagraphStyle("mhead", fontName="Sora-Bold", fontSize=12, leading=15, textColor=INK, spaceBefore=8, spaceAfter=5),
-        "role": ParagraphStyle("role", fontName="Inter-Sem", fontSize=10.5, leading=14, textColor=INK, spaceBefore=6),
-        "meta": ParagraphStyle("meta", fontName="Inter", fontSize=8.8, leading=12, textColor=MUT, spaceAfter=3),
-        "body": ParagraphStyle("body", fontName="Inter", fontSize=9.2, leading=13.4, textColor=INK, spaceAfter=2),
-        "bullet": ParagraphStyle("bullet", fontName="Inter", fontSize=9.2, leading=13.2, textColor=INK,
-                                 leftIndent=9, bulletIndent=1, spaceAfter=2),
+        "name": ParagraphStyle("name", fontName="Sora-Extra", fontSize=26, leading=30, textColor=INK),
+        "title": ParagraphStyle("title", fontName="Inter-Sem", fontSize=12, leading=16, textColor=ACC, spaceBefore=3),
+        "avatar": ParagraphStyle("avatar", fontName="Sora-Extra", fontSize=15, leading=17, textColor=WHITE, alignment=TA_CENTER),
+        "shead": ParagraphStyle("shead", fontName="Inter-Bold", fontSize=8.6, leading=11, textColor=SA, spaceBefore=13, spaceAfter=5),
+        "sval": ParagraphStyle("sval", fontName="Inter", fontSize=8.4, leading=12, textColor=SLT),
+        "stag": ParagraphStyle("stag", fontName="Inter-Med", fontSize=8.4, leading=12, textColor=SLT, spaceBefore=6),
+        "mhead": ParagraphStyle("mhead", fontName="Sora-Bold", fontSize=12.5, leading=16, textColor=INK, spaceBefore=12, spaceAfter=5),
+        "role": ParagraphStyle("role", fontName="Inter-Sem", fontSize=10.5, leading=14, textColor=INK, spaceBefore=7),
+        "meta": ParagraphStyle("meta", fontName="Inter", fontSize=8.8, leading=12, textColor=MUT, spaceAfter=4),
+        "body": ParagraphStyle("body", fontName="Inter", fontSize=9.3, leading=13.6, textColor=INK, spaceAfter=2),
+        "bullet": ParagraphStyle("bullet", fontName="Inter", fontSize=9.3, leading=13.4, textColor=INK,
+                                 leftIndent=10, bulletIndent=1, spaceAfter=2),
     }
     def rule_accent():
-        return HRFlowable(width="100%", thickness=1.1, color=ACC, spaceBefore=1, spaceAfter=4)
+        return HRFlowable(width="100%", thickness=1.2, color=ACC, spaceBefore=1, spaceAfter=6)
     initials = "".join(p[0] for p in struct.get("nom", "").split()[:2]).upper() or "CV"
     contact = struct.get("contact") or {}
-    sidebar = [Spacer(1, 4)]
-    avatar = Table([[Paragraph(initials, st["avatar"])]], colWidths=[20*mm], rowHeights=[20*mm])
-    avatar.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), SA),
-                                ("ROUNDEDCORNERS", [10*mm]*4),
+    sidebar = [Spacer(1, 5)]
+    avatar = Table([[Paragraph(initials, st["avatar"])]], colWidths=[19*mm], rowHeights=[19*mm])
+    avatar.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), ACC),
+                                ("ROUNDEDCORNERS", [9.5*mm]*4),
                                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE")]))
-    sidebar.append(avatar); sidebar.append(Spacer(1, 8))
-    sidebar.append(Paragraph(escape(struct.get("nom", "")), st["name"]))
-    if struct.get("titre"):
-        sidebar.append(Paragraph(escape(struct["titre"]), st["title"]))
-    sidebar.append(Spacer(1, 8))
+    sidebar.append(avatar)
+    sidebar.append(Paragraph(escape(struct.get("titre", "") or "Profil"), st["title"]))
     contact_rows = [("Email", contact.get("email")), ("Téléphone", contact.get("telephone")),
                     ("Localisation", contact.get("localisation")), ("GitHub", contact.get("github")),
                     ("LinkedIn", contact.get("linkedin"))]
@@ -660,16 +657,16 @@ def build_ats_pdf(struct, validated_keywords):
         sidebar.append(Paragraph("CONTACT", st["shead"]))
         for label, value in contact_rows:
             if value:
-                sidebar.append(Paragraph(f'<font color="#94a3b8" size="7.3">{label.upper()}</font><br/>{escape(value)}', st["sval"]))
-                sidebar.append(Spacer(1, 3))
+                sidebar.append(Paragraph(f'<font color="#94a3b8" size="7.2">{label.upper()}</font><br/>{escape(value)}', st["sval"]))
+                sidebar.append(Spacer(1, 4))
     if struct.get("competences"):
         sidebar.append(Paragraph("COMPÉTENCES", st["shead"]))
         for group in struct["competences"]:
             if group.get("items"):
-                sidebar.append(Paragraph(f'<font color="#94a3b8" size="7.3">{escape(group.get("groupe", "")).upper()}</font><br/>{escape(group["items"])}', st["stag"]))
+                sidebar.append(Paragraph(f'<font color="#94a3b8" size="7.2">{escape(group.get("groupe", "")).upper()}</font><br/>{escape(group["items"])}', st["stag"]))
     if validated_keywords:
-        sidebar.append(Paragraph("COMPÉTENCES CIBLÉES", st["shead"]))
-        sidebar.append(Paragraph(f'<font color="#818cf8">{escape(" · ".join(validated_keywords))}</font>', st["stag"]))
+        sidebar.append(Paragraph("MOTS-CLÉS CIBLÉS", st["shead"]))
+        sidebar.append(Paragraph(f'<font color="#c7d2fe">{escape(" · ".join(validated_keywords))}</font>', st["stag"]))
     if struct.get("certifications"):
         sidebar.append(Paragraph("CERTIFICATIONS", st["shead"]))
         for c in struct["certifications"]:
@@ -678,7 +675,10 @@ def build_ats_pdf(struct, validated_keywords):
         sidebar.append(Paragraph("LANGUES", st["shead"]))
         for lg in struct["langues"]:
             sidebar.append(Paragraph(escape(lg), st["sval"]))
-    main = [Spacer(1, 2)]
+    main = [Spacer(1, 4)]
+    main.append(Paragraph(escape(struct.get("nom", "")), st["name"]))
+    if struct.get("titre"):
+        main.append(Paragraph(escape(struct["titre"]), st["title"]))
     if struct.get("profil"):
         main.append(Paragraph("PROFIL", st["mhead"])); main.append(rule_accent())
         main.append(Paragraph(escape(struct["profil"]), st["body"]))
@@ -705,9 +705,9 @@ def build_ats_pdf(struct, validated_keywords):
         ("BACKGROUND", (1, 0), (1, -1), WHITE),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (0, -1), 20), ("RIGHTPADDING", (0, 0), (0, -1), 15),
-        ("TOPPADDING", (0, 0), (0, -1), 16), ("BOTTOMPADDING", (0, 0), (0, -1), 16),
-        ("LEFTPADDING", (1, 0), (1, -1), 24), ("RIGHTPADDING", (1, 0), (1, -1), 22),
-        ("TOPPADDING", (1, 0), (1, -1), 16), ("BOTTOMPADDING", (1, 0), (1, -1), 16),
+        ("TOPPADDING", (0, 0), (0, -1), 20), ("BOTTOMPADDING", (0, 0), (0, -1), 18),
+        ("LEFTPADDING", (1, 0), (1, -1), 26), ("RIGHTPADDING", (1, 0), (1, -1), 24),
+        ("TOPPADDING", (1, 0), (1, -1), 22), ("BOTTOMPADDING", (1, 0), (1, -1), 18),
     ]))
     doc.build([table])
     return out.getvalue()

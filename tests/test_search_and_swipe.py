@@ -108,7 +108,7 @@ class SemanticSearchTests(unittest.TestCase):
         extracted = " ".join((page.extract_text() or "" for page in PdfReader(BytesIO(pdf)).pages)).replace("\n", " ")
         extracted = " ".join(extracted.split())
         self.assertIn("Youssef Exemple", extracted)
-        self.assertIn("COMPÉTENCES CIBLÉES", extracted)
+        self.assertIn("MOTS-CLÉS CIBLÉS", extracted)
         self.assertIn("réponse aux incidents", extracted)
 
     def test_fallback_rewrite_preserves_source_facts(self):
