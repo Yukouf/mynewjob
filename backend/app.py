@@ -37,13 +37,14 @@ except ImportError:
     HAS_PYPDF = False
 
 try:
-    from reportlab.lib.enums import TA_CENTER
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import mm
+    from reportlab.lib.colors import HexColor
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, KeepTogether
     HAS_REPORTLAB = True
 except ImportError:
     HAS_REPORTLAB = False
@@ -509,68 +510,206 @@ def extract_pdf_text(pdf_b64):
         raise ValueError("Aucun texte extrait (CV scanné en image ?)")
     return text
 
-def fallback_rewrite_cv(source):
-    """Nettoie la structure sans modifier ni inventer les informations du CV."""
-    lines = [re.sub(r"\s+", " ", line).strip() for line in source.splitlines()]
-    return "\n".join(line for line in lines if line)
+def fallback_structure(source, keywords):
+    """Structure minimale extraite du texte brut, sans rien inventer."""
+    lines = [re.sub(r"\s+", " ", l).strip() for l in source.splitlines() if l.strip()]
+    email = phone = ""
+    for line in lines:
+        m = re.search(r"[\w.+-]+@[\w.-]+\.[a-z]{2,}", line)
+        if m and not email:
+            email = m.group(0)
+        m2 = re.search(r"\b0[67][ .-]?\d{2}(?:[ .-]?\d{2}){3}\b", line)
+        if m2 and not phone:
+            phone = m2.group(0)
+    return {
+        "nom": lines[0] if lines else "",
+        "titre": "",
+        "contact": {"email": email, "telephone": phone, "localisation": "", "github": "", "linkedin": ""},
+        "profil": " ".join(lines[1:])[:1400],
+        "competences": [{"groupe": "Compétences ciblées", "items": " · ".join(keywords)}] if keywords else [],
+        "experiences": [], "formation": [], "certifications": [], "langues": [],
+    }
+
+def _coerce_struct(raw):
+    if not isinstance(raw, dict):
+        raise ValueError("JSON attendu")
+    contact = raw.get("contact") if isinstance(raw.get("contact"), dict) else {}
+    def s(v): return str(v).strip() if v else ""
+    def lst(v): return [str(x).strip() for x in v] if isinstance(v, list) else []
+    def groups(v):
+        out = []
+        for g in (v if isinstance(v, list) else []):
+            if isinstance(g, dict):
+                out.append({"groupe": s(g.get("groupe")), "items": s(g.get("items"))})
+        return out
+    def exps(v):
+        out = []
+        for e in (v if isinstance(v, list) else []):
+            if isinstance(e, dict):
+                out.append({"role": s(e.get("role")), "meta": s(e.get("meta")), "bullets": lst(e.get("bullets"))})
+        return out
+    def entries(v):
+        out = []
+        for e in (v if isinstance(v, list) else []):
+            if isinstance(e, dict):
+                out.append({"role": s(e.get("role")), "meta": s(e.get("meta"))})
+            elif isinstance(e, str):
+                out.append({"role": e.strip(), "meta": ""})
+        return out
+    return {
+        "nom": s(raw.get("nom")), "titre": s(raw.get("titre")),
+        "contact": {k: s(contact.get(k)) for k in ("email", "telephone", "localisation", "github", "linkedin")},
+        "profil": s(raw.get("profil")), "competences": groups(raw.get("competences")),
+        "experiences": exps(raw.get("experiences")), "formation": entries(raw.get("formation")),
+        "certifications": lst(raw.get("certifications")), "langues": lst(raw.get("langues")),
+    }
 
 def rewrite_cv_with_ai(source, keywords, target=""):
     key = os.environ.get("DEEPSEEK_API_KEY", "")
     if not key:
-        return fallback_rewrite_cv(source), "mise en page ATS"
+        return fallback_structure(source, keywords), "mise en page ATS"
     system = (
-        "Vous réécrivez un CV en français dans un format ATS sobre, une colonne, texte brut. "
-        "Conservez strictement l'identité, les coordonnées, employeurs, dates, diplômes et faits fournis. "
-        "N'inventez aucune compétence, mission, durée ni résultat. Utilisez les mots-clés validés seulement "
-        "lorsqu'ils sont cohérents avec les faits du CV. Sections attendues : TITRE, PROFIL, COMPÉTENCES, "
-        "EXPÉRIENCES, FORMATION, CERTIFICATIONS, LANGUES. Ne produisez ni tableau, ni Markdown, ni commentaire."
+        "Vous extrayez et reformulez un CV en français, sans rien inventer. Vous recevez le texte brut d'un "
+        "CV PDF. Conservez strictement les faits : identité, coordonnées, employeurs, dates, diplômes et "
+        "compétences réellement mentionnés. N'inventez jamais une compétence, une mission, un chiffre ou un "
+        "diplôme. Reformulez le profil et les missions de façon concise et professionnelle. Intégrez les "
+        "mots-clés validés uniquement lorsqu'ils sont cohérents avec les faits. Répondez UNIQUEMENT en JSON "
+        "valide, sans texte autour, avec ce schéma exact : "
+        '{"nom":"","titre":"","contact":{"email":"","telephone":"","localisation":"","github":"","linkedin":""},'
+        '"profil":"","competences":[{"groupe":"","items":""}],'
+        '"experiences":[{"role":"","meta":"","bullets":[""]}],'
+        '"formation":[{"role":"","meta":""}],"certifications":[""],"langues":[""]}. '
+        "Champ absent : chaîne vide ou liste vide."
     )
     user = (f"Métier ciblé : {target or 'domaine détecté'}\n"
-            f"Mots-clés validés par le candidat : {', '.join(keywords)}\n\nCV source :\n{source[:18000]}")
+            f"Mots-clés validés par le candidat : {', '.join(keywords)}\n\nTexte brut du CV :\n{source[:18000]}")
     body = json.dumps({"model": "deepseek-chat", "messages": [
         {"role": "system", "content": system}, {"role": "user", "content": user}],
-        "temperature": 0.1, "max_tokens": 2200}).encode()
+        "temperature": 0.1, "max_tokens": 2600, "response_format": {"type": "json_object"}}).encode()
     req = urllib.request.Request("https://api.deepseek.com/chat/completions", data=body,
                                  headers={"Content-Type": "application/json", "Authorization": "Bearer " + key})
     try:
-        with urllib.request.urlopen(req, timeout=75) as response:
-            text = json.load(response)["choices"][0]["message"]["content"].strip()
-        return text or fallback_rewrite_cv(source), "IA"
+        with urllib.request.urlopen(req, timeout=90) as response:
+            raw = json.load(response)["choices"][0]["message"]["content"].strip()
+        return _coerce_struct(json.loads(raw)), "IA"
     except Exception:
-        return fallback_rewrite_cv(source), "mise en page ATS"
+        return fallback_structure(source, keywords), "mise en page ATS"
 
-def build_ats_pdf(content, validated_keywords):
+_FONTS_REGISTERED = False
+
+def _ensure_cv_fonts():
+    global _FONTS_REGISTERED
+    if _FONTS_REGISTERED:
+        return True
+    fonts = Path(__file__).resolve().parent / "fonts"
+    try:
+        pdfmetrics.registerFont(TTFont("Inter", str(fonts / "inter-400.ttf")))
+        pdfmetrics.registerFont(TTFont("Inter-Med", str(fonts / "inter-500.ttf")))
+        pdfmetrics.registerFont(TTFont("Inter-Sem", str(fonts / "inter-600.ttf")))
+        pdfmetrics.registerFont(TTFont("Inter-Bold", str(fonts / "inter-700.ttf")))
+        pdfmetrics.registerFont(TTFont("Sora-Bold", str(fonts / "sora-700.ttf")))
+        pdfmetrics.registerFont(TTFont("Sora-Extra", str(fonts / "sora-800.ttf")))
+        pdfmetrics.registerFontFamily("Inter", normal="Inter", bold="Inter-Bold", italic="Inter", boldItalic="Inter-Bold")
+        pdfmetrics.registerFontFamily("Sora", normal="Sora-Bold", bold="Sora-Extra", italic="Sora-Bold", boldItalic="Sora-Extra")
+        _FONTS_REGISTERED = True
+        return True
+    except Exception:
+        return False
+
+def build_ats_pdf(struct, validated_keywords):
+    """CV 2 colonnes façon FlowCV : sidebar sombre + contenu principal blanc."""
     if not HAS_REPORTLAB:
         raise RuntimeError("reportlab absent")
-    regular = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-    bold = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-    pdfmetrics.registerFont(TTFont("ATS-Regular", regular))
-    pdfmetrics.registerFont(TTFont("ATS-Bold", bold))
-    out = BytesIO()
-    doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=18*mm, rightMargin=18*mm,
-                            topMargin=16*mm, bottomMargin=16*mm,
-                            title="CV optimisé ATS", author="MYNEWJOB")
-    styles = getSampleStyleSheet()
-    normal = ParagraphStyle("ATSBody", parent=styles["BodyText"], fontName="ATS-Regular",
-                            fontSize=9.2, leading=12.2, spaceAfter=4)
-    heading = ParagraphStyle("ATSHeading", parent=normal, fontName="ATS-Bold", fontSize=11,
-                             leading=14, spaceBefore=8, spaceAfter=5, textColor="#312e81")
-    title = ParagraphStyle("ATSTitle", parent=heading, fontSize=16, leading=20,
-                           alignment=TA_CENTER, textColor="#111827", spaceAfter=10)
-    lines = [line.strip(" #*") for line in content.splitlines() if line.strip()]
-    story = []
-    if lines:
-        story.extend([Paragraph(escape(lines[0]), title), Spacer(1, 3*mm)])
-    headings = {"TITRE", "PROFIL", "COMPÉTENCES", "COMPETENCES", "EXPÉRIENCES", "EXPERIENCES",
-                "EXPÉRIENCE", "EXPERIENCE", "FORMATION", "CERTIFICATIONS", "LANGUES"}
-    for line in lines[1:]:
-        clean = line.strip(" -•\t")
-        style = heading if normalize(clean).upper() in {normalize(h).upper() for h in headings} or (clean.isupper() and 5 <= len(clean) < 45) else normal
-        story.append(Paragraph(escape(clean), style))
+    if not _ensure_cv_fonts():
+        raise RuntimeError("polices CV introuvables")
+    INK = HexColor("#111827"); MUT = HexColor("#6b7280"); ACC = HexColor("#4f46e5")
+    DARK = HexColor("#0f172a"); WHITE = HexColor("#ffffff")
+    SLT = HexColor("#cbd5e1"); SMUT = HexColor("#94a3b8"); SA = HexColor("#818cf8")
+    st = {
+        "name": ParagraphStyle("name", fontName="Sora-Extra", fontSize=23, leading=27, textColor=WHITE),
+        "title": ParagraphStyle("title", fontName="Inter-Sem", fontSize=10, leading=14, textColor=SA),
+        "avatar": ParagraphStyle("avatar", fontName="Sora-Extra", fontSize=16, leading=18, textColor=WHITE, alignment=TA_CENTER),
+        "shead": ParagraphStyle("shead", fontName="Inter-Bold", fontSize=9, leading=12, textColor=SA, spaceBefore=10, spaceAfter=4),
+        "sval": ParagraphStyle("sval", fontName="Inter", fontSize=8.4, leading=12.5, textColor=SLT),
+        "stag": ParagraphStyle("stag", fontName="Inter-Med", fontSize=8.4, leading=12.5, textColor=SLT, spaceBefore=5),
+        "mhead": ParagraphStyle("mhead", fontName="Sora-Bold", fontSize=12, leading=15, textColor=INK, spaceBefore=8, spaceAfter=5),
+        "role": ParagraphStyle("role", fontName="Inter-Sem", fontSize=10.5, leading=14, textColor=INK, spaceBefore=6),
+        "meta": ParagraphStyle("meta", fontName="Inter", fontSize=8.8, leading=12, textColor=MUT, spaceAfter=3),
+        "body": ParagraphStyle("body", fontName="Inter", fontSize=9.2, leading=13.4, textColor=INK, spaceAfter=2),
+        "bullet": ParagraphStyle("bullet", fontName="Inter", fontSize=9.2, leading=13.2, textColor=INK,
+                                 leftIndent=9, bulletIndent=1, spaceAfter=2),
+    }
+    def rule_accent():
+        return HRFlowable(width="100%", thickness=1.1, color=ACC, spaceBefore=1, spaceAfter=4)
+    initials = "".join(p[0] for p in struct.get("nom", "").split()[:2]).upper() or "CV"
+    contact = struct.get("contact") or {}
+    sidebar = [Spacer(1, 4)]
+    avatar = Table([[Paragraph(initials, st["avatar"])]], colWidths=[20*mm], rowHeights=[20*mm])
+    avatar.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), SA),
+                                ("ROUNDEDCORNERS", [10*mm]*4),
+                                ("VALIGN", (0, 0), (-1, -1), "MIDDLE")]))
+    sidebar.append(avatar); sidebar.append(Spacer(1, 8))
+    sidebar.append(Paragraph(escape(struct.get("nom", "")), st["name"]))
+    if struct.get("titre"):
+        sidebar.append(Paragraph(escape(struct["titre"]), st["title"]))
+    sidebar.append(Spacer(1, 8))
+    contact_rows = [("Email", contact.get("email")), ("Téléphone", contact.get("telephone")),
+                    ("Localisation", contact.get("localisation")), ("GitHub", contact.get("github")),
+                    ("LinkedIn", contact.get("linkedin"))]
+    if any(v for _, v in contact_rows):
+        sidebar.append(Paragraph("CONTACT", st["shead"]))
+        for label, value in contact_rows:
+            if value:
+                sidebar.append(Paragraph(f'<font color="#94a3b8" size="7.3">{label.upper()}</font><br/>{escape(value)}', st["sval"]))
+                sidebar.append(Spacer(1, 3))
+    if struct.get("competences"):
+        sidebar.append(Paragraph("COMPÉTENCES", st["shead"]))
+        for group in struct["competences"]:
+            if group.get("items"):
+                sidebar.append(Paragraph(f'<font color="#94a3b8" size="7.3">{escape(group.get("groupe", "")).upper()}</font><br/>{escape(group["items"])}', st["stag"]))
     if validated_keywords:
-        story.append(Paragraph("COMPÉTENCES CIBLÉES", heading))
-        story.append(Paragraph(escape(" • ".join(validated_keywords)), normal))
-    doc.build(story)
+        sidebar.append(Paragraph("COMPÉTENCES CIBLÉES", st["shead"]))
+        sidebar.append(Paragraph(f'<font color="#818cf8">{escape(" · ".join(validated_keywords))}</font>', st["stag"]))
+    if struct.get("certifications"):
+        sidebar.append(Paragraph("CERTIFICATIONS", st["shead"]))
+        for c in struct["certifications"]:
+            sidebar.append(Paragraph("• " + escape(c), st["sval"]))
+    if struct.get("langues"):
+        sidebar.append(Paragraph("LANGUES", st["shead"]))
+        for lg in struct["langues"]:
+            sidebar.append(Paragraph(escape(lg), st["sval"]))
+    main = [Spacer(1, 2)]
+    if struct.get("profil"):
+        main.append(Paragraph("PROFIL", st["mhead"])); main.append(rule_accent())
+        main.append(Paragraph(escape(struct["profil"]), st["body"]))
+    if struct.get("experiences"):
+        main.append(Paragraph("EXPÉRIENCE PROFESSIONNELLE", st["mhead"])); main.append(rule_accent())
+        for exp in struct["experiences"]:
+            main.append(Paragraph(escape(exp.get("role", "")), st["role"]))
+            if exp.get("meta"):
+                main.append(Paragraph(escape(exp["meta"]), st["meta"]))
+            for b in exp.get("bullets", []):
+                main.append(Paragraph("• " + escape(b), st["bullet"]))
+    if struct.get("formation"):
+        main.append(Paragraph("FORMATION", st["mhead"])); main.append(rule_accent())
+        for f in struct["formation"]:
+            main.append(Paragraph(escape(f.get("role", "")), st["role"]))
+            if f.get("meta"):
+                main.append(Paragraph(escape(f["meta"]), st["meta"]))
+    out = BytesIO()
+    doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=0, rightMargin=0, topMargin=0, bottomMargin=0,
+                            title="CV — " + struct.get("nom", ""), author="MYNEWJOB")
+    table = Table([[sidebar, main]], colWidths=[62*mm, 148*mm])
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, -1), DARK),
+        ("BACKGROUND", (1, 0), (1, -1), WHITE),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (0, -1), 20), ("RIGHTPADDING", (0, 0), (0, -1), 15),
+        ("TOPPADDING", (0, 0), (0, -1), 16), ("BOTTOMPADDING", (0, 0), (0, -1), 16),
+        ("LEFTPADDING", (1, 0), (1, -1), 24), ("RIGHTPADDING", (1, 0), (1, -1), 22),
+        ("TOPPADDING", (1, 0), (1, -1), 16), ("BOTTOMPADDING", (1, 0), (1, -1), 16),
+    ]))
+    doc.build([table])
     return out.getvalue()
 
 def rewrite_cv(pdf_b64, keywords, target=""):
@@ -581,8 +720,8 @@ def rewrite_cv(pdf_b64, keywords, target=""):
             clean = re.sub(r"[^\wÀ-ÿ +#./-]", "", str(keyword)).strip()[:50]
             if clean and normalize(clean) not in [normalize(k) for k in selected]:
                 selected.append(clean)
-        content, mode = rewrite_cv_with_ai(source, selected[:12], str(target)[:100])
-        pdf = build_ats_pdf(content, selected[:12])
+        struct, mode = rewrite_cv_with_ai(source, selected[:12], str(target)[:100])
+        pdf = build_ats_pdf(struct, selected[:12])
         return {"pdf": b64encode(pdf).decode(), "filename": "CV_optimise_ATS.pdf", "mode": mode,
                 "mots_cles_valides": selected[:12]}
     except Exception as exc:

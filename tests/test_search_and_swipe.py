@@ -94,19 +94,29 @@ class SemanticSearchTests(unittest.TestCase):
         self.assertLess(analysis["score"], 100)
 
     def test_ats_pdf_contains_rewritten_content_and_validated_keywords(self):
-        content = "Youssef Exemple\nAnalyste SOC\nEXPÉRIENCE\nSupervision Wazuh.\nFORMATION\nMaster cybersécurité."
-        pdf = app.build_ats_pdf(content, ["SIEM", "réponse aux incidents"])
+        struct = {
+            "nom": "Youssef Exemple", "titre": "Analyste SOC",
+            "contact": {"email": "y@exemple.fr", "telephone": "", "localisation": "", "github": "", "linkedin": ""},
+            "profil": "Supervision Wazuh et réponse aux incidents.",
+            "competences": [{"groupe": "Supervision", "items": "Wazuh · SIEM"}],
+            "experiences": [{"role": "Analyste SOC", "meta": "2023-2026", "bullets": ["Supervision Wazuh"]}],
+            "formation": [{"role": "Master cybersécurité", "meta": "2024-2026"}],
+            "certifications": ["CCNA"], "langues": ["Français : natif"],
+        }
+        pdf = app.build_ats_pdf(struct, ["SIEM", "réponse aux incidents"])
         self.assertTrue(pdf.startswith(b"%PDF"))
-        extracted = "\n".join(page.extract_text() or "" for page in PdfReader(BytesIO(pdf)).pages)
+        extracted = " ".join((page.extract_text() or "" for page in PdfReader(BytesIO(pdf)).pages)).replace("\n", " ")
+        extracted = " ".join(extracted.split())
         self.assertIn("Youssef Exemple", extracted)
         self.assertIn("COMPÉTENCES CIBLÉES", extracted)
         self.assertIn("réponse aux incidents", extracted)
 
     def test_fallback_rewrite_preserves_source_facts(self):
-        source = "Youssef Exemple\nTrois ans chez Exemple SA\nWazuh et Suricata"
-        rewritten = app.fallback_rewrite_cv(source)
-        self.assertIn("Trois ans chez Exemple SA", rewritten)
-        self.assertIn("Wazuh et Suricata", rewritten)
+        source = "Youssef Exemple\ny@exemple.fr\nTrois ans chez Exemple SA\nWazuh et Suricata"
+        struct = app.fallback_structure(source, ["SIEM"])
+        self.assertEqual("y@exemple.fr", struct["contact"]["email"])
+        self.assertIn("Exemple SA", struct["profil"])
+        self.assertIn("Wazuh et Suricata", struct["profil"])
 
 
 class SwipeCopyTests(unittest.TestCase):
